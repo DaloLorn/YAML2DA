@@ -1,0 +1,8 @@
+yamlType: cls_feat
+levels:
+  epic:
+    grants:
+      Something: 58
+  4:
+    bonusPicks:
+      SomethingElse: 24

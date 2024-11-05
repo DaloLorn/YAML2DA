@@ -1,0 +1,71 @@
+yamlType: cls_feat
+levels:
+  "2":
+    unlocks:
+      SCARIFICATION: 2789
+    unlocksBonus: {}
+    bonusPicks: {}
+    grants: {}
+  "3":
+    unlocks:
+      Deathknell: 2666
+    unlocksBonus: {}
+    bonusPicks: {}
+    grants: {}
+  "4":
+    unlocks:
+      BLOODDRAUGHT: 2788
+    unlocksBonus: {}
+    bonusPicks: {}
+    grants: {}
+  "6":
+    unlocks:
+      BLOODSEEKINGSPELL: 2786
+    unlocksBonus: {}
+    bonusPicks: {}
+    grants: {}
+  "7":
+    unlocks:
+      THICKERTHANWATER: 2785
+    unlocksBonus: {}
+    bonusPicks: {}
+    grants: {}
+  "8":
+    unlocks:
+      AWAKENBLOOD: 2783
+    unlocksBonus: {}
+    bonusPicks: {}
+    grants: {}
+  "10":
+    unlocks:
+      BLOODWALK: 2784
+    unlocksBonus: {}
+    bonusPicks: {}
+    grants: {}
+  epic:
+    unlocks:
+      FEAT_EPIC_SPELL_DRAGON_KNIGHT: 875
+      FEAT_EPIC_SPELL_HELLBALL: 876
+      FEAT_EPIC_SPELL_RUIN: 878
+      FEAT_EPIC_SPELL_ENTROPIC_HUSK: 1992
+      FEAT_EPIC_SPELL_EPIC_GATE: 1993
+      FEAT_EPIC_SPELL_MASS_FOWL: 1994
+      FEAT_EPIC_SPELL_VAMPIRIC_FEAST: 1995
+      FEAT_EPIC_SPELL_CALL_LIGHTNING: 3907
+    unlocksBonus: {}
+    bonusPicks: {}
+    grants: {}
+  always:
+    unlocks:
+      STANCH: 2790
+      BLOODCOMPONENT: 2791
+      CONCENTRATION: 173
+      WIZARD: 2771
+      Sorcerer: 2770
+      Bard: 2665
+      Warlock: 4586
+    unlocksBonus: {}
+    bonusPicks: {}
+    grants: {}
+generateOutput: true
+epicFrom: 11
