@@ -1,6 +1,6 @@
 import ClassFeatList from "./cls_feat.js";
 import build2DA from "../util/build_2da.js";
-import { flatMap, map } from "lodash-es";
+import { flatMap } from "lodash-es";
 
 const RaceFeatList = {
     validate: validate,
