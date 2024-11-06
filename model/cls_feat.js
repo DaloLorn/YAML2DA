@@ -1,22 +1,32 @@
 import { pickBy } from "lodash-es";
+import build2DA from "../util/build_2da.js";
 
 const ClassFeatList = {
     validate: validate,
     pack: pack,
     unpack: unpack,
     postLoad: postLoad,
+    hasMultipleFiles: true,
 };
 export default ClassFeatList;
+
+const columns = [
+    "FeatLabel",
+    "FeatIndex",
+    "List",
+    "GrantedOnLevel",
+    "OnMenu",
+];
 
 function postLoad(file, context) {
     const result = file;
     if(Object.keys(context.files.cls_feat).includes(file.identifier))
-        throw new ReferenceError(`Feat list identifier ${file.identifier} is declared twice! Remember that files without an explicit "identifier" field will use their filename as an identifier!`);
+        throw new ReferenceError(`Class feat list identifier ${file.identifier} is declared twice! Remember that files without an explicit "identifier" field will use their filename as an identifier!`);
 
     (file.imports || []).forEach((dependency) => {
         // This check shouldn't fail, but leaving it in just in case!
         if(!Object.keys(context.files.cls_feat).includes(dependency)) {
-            throw new ReferenceError(`Dependency ${dependency} for feat list ${file.identifier} not found in project! Either it does not exist, or there is a circular dependency somewhere!`);
+            throw new ReferenceError(`Dependency ${dependency} for class feat list ${file.identifier} not found in project! Either it does not exist, or there is a circular dependency somewhere!`);
         }
 
         Object.entries(context.files.cls_feat[dependency].levels).forEach(([levelNumber, level]) => {                
@@ -52,12 +62,7 @@ function postLoad(file, context) {
 
 function validate(list) {
     if(!list.yamlType) {
-        return [
-            "FeatLabel",
-            "FeatIndex",
-            "List",
-            "GrantedOnLevel",
-        ].every(column => list.columns?.includes(column));
+        return columns.every(column => list.columns?.includes(column));
     }
     else {
         return list.yamlType === "cls_feat";
@@ -91,26 +96,29 @@ function add2DAEntry(label, id, grantType, level, output) {
 }
 
 function pack(list) {
-    return Object.entries(list.levels).flatMap(([levelNumber, level]) => {
-        if(levelNumber === "always")
-            levelNumber = 1;
-        else if(levelNumber === "epic")
-            levelNumber = list.epicFrom || 21;
-        const output = [];
-        level.unlocks && Object.entries(level.unlocks).forEach(([label, id]) =>
-            add2DAEntry(label, id, GRANT_TYPES.UNLOCK, levelNumber, output)
-        );
-        level.unlocksBonus && Object.entries(level.unlocksBonus).forEach(([label, id]) =>
-            add2DAEntry(label, id, GRANT_TYPES.UNLOCK_BONUS, levelNumber, output)
-        );
-        level.bonusPicks && Object.entries(level.bonusPicks).forEach(([label, id]) =>
-            add2DAEntry(label, id, GRANT_TYPES.BONUS_PICK, levelNumber, output)
-        );
-        level.grants && Object.entries(level.grants).forEach(([label, id]) => 
-            add2DAEntry(label, id, GRANT_TYPES.GRANT, levelNumber, output)
-        );
-        return output;
-    })
+    return build2DA(
+        columns,
+        Object.entries(list.levels).flatMap(([levelNumber, level]) => {
+            if(levelNumber === "always")
+                levelNumber = 1;
+            else if(levelNumber === "epic")
+                levelNumber = list.epicFrom || 21;
+            const output = [];
+            level.unlocks && Object.entries(level.unlocks).forEach(([label, id]) =>
+                add2DAEntry(label, id, GRANT_TYPES.UNLOCK, levelNumber, output)
+            );
+            level.unlocksBonus && Object.entries(level.unlocksBonus).forEach(([label, id]) =>
+                add2DAEntry(label, id, GRANT_TYPES.UNLOCK_BONUS, levelNumber, output)
+            );
+            level.bonusPicks && Object.entries(level.bonusPicks).forEach(([label, id]) =>
+                add2DAEntry(label, id, GRANT_TYPES.BONUS_PICK, levelNumber, output)
+            );
+            level.grants && Object.entries(level.grants).forEach(([label, id]) => 
+                add2DAEntry(label, id, GRANT_TYPES.GRANT, levelNumber, output)
+            );
+            return output;
+        }),
+    );
 }
 
 function addYAMLEntry(featId, featLabel, grantList) {
@@ -133,7 +141,7 @@ function unpack(list) {
 
     const levels = {};
     list.rows.forEach((row) => {
-        if(!row[FeatIndex])
+        if(!row[FeatIndex] && Number(row[FeatIndex]) != 0)
             return; // We really don't need to include padding...
         let levelNumber = Number(row[GrantedOnLevel]);
         if(levelNumber < 2 || Number.isNaN(levelNumber)) // Prettify a bit!

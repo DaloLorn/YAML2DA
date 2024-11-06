@@ -1,10 +1,11 @@
 # YAML2DA
 Neverwinter Nights 2 modding tool designed to simplify large-scale editing (such as is typically seen on most persistent worlds) of the game's 2DA files by converting them into a more flexible YAML-based format.
 
-This tool is backed by @CromFr's excellent [nwn-lib](https://gitlab.com/CromFr/nwn-lib-rs) project, currently leveraging nwn-2da v0.3.3 for all 2DA I/O.
+This tool is backed by @CromFr's excellent [nwn-lib](https://gitlab.com/CromFr/nwn-lib-rs) project, currently leveraging nwn-2da v0.3.7 for all 2DA I/O.
 
 Currently supported 2DA types:
-- [cls_feat_*](https://nwn2.fandom.com/wiki/Cls_feat_*.2da)
+- [cls_feat](https://nwn2.fandom.com/wiki/Cls_feat_*.2da)
+- [race_feat](https://nwn2.fandom.com/wiki/Race_feat_*.2da)
 
 ## System Requirements
 - Just about any Windows operating system
@@ -21,8 +22,10 @@ Currently supported 2DA types:
 
 ## Format Documentation
 See the `sample` folder for sample files:
-- `cls_feat_caval.yml` is a handcrafted, annotated sample containing example uses of all YAML2DA features for the `cls_feat_*` 2DA type.
-- `bonuses/bonus_feat_fighter.yml` is a quick-and-dirty example of how to build partial feat lists for use with the `cls_feat` type's `import` field.
+- `cls_feat_caval.yml` is a handcrafted, annotated sample containing example uses of all YAML2DA features for the `cls_feat` type.
+- `race_feat_aasim.yml` is likewise an annotated sample of the `race_feat` type.
+- `includes/bonus_feat_fighter.yml` is a quick-and-dirty example of how to build partial feat lists for use with the `cls_feat` type's `import` field.
+- `includes/universal_feats.yml` is a less-sloppy example of how to build an include for the `race_feat` type.
 - `cls_feat_bloodmagus.yml` is a sample output from the `yaml2da import` command. There are some stylistic deviations from the handcrafted Cavalier file above, but both files are legal YAML2DA feat lists and will generate 2DAs normally.
 
 ## Recommended Workflow

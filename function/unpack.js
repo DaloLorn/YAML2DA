@@ -3,7 +3,8 @@ import { exec } from "child_process";
 import { parse, stringify } from "yaml";
 import { writeFile, stat, readdir, mkdir } from "fs/promises";
 import { existsSync } from "fs";
-import ClassFeatList from "../model/cls_feat.js";
+import { find } from "lodash-es";
+import { ModelTypes } from "../util/modelTypes.js";
 
 export default async function unpackFrom2DA(params) {
     const project = params[0];
@@ -27,17 +28,17 @@ export default async function unpackFrom2DA(params) {
     if(!existsSync(outputFolder))
         await mkdir(outputFolder)
 
+
     projectFiles.forEach(file => {
         const outputFile = path.join(outputFolder, `${path.basename(file.toLowerCase(), ".2da")}.yml`)
         const nwn2da = exec(`nwn-2da -O yaml "${file}"`, async (error, output, stderr) => {
             if(!error) {
                 const parsed2DA = parse(output);
-                let unpacked = false;
-                if(ClassFeatList.validate(parsed2DA)) {
-                    unpacked = true;
-                    await writeFile(outputFile, stringify(ClassFeatList.unpack(parsed2DA)))
+                const handler = find(ModelTypes, handler => handler.validate(parsed2DA));
+                if(handler) {
+                    await writeFile(outputFile, stringify(handler.unpack(parsed2DA)));
+                    console.log(`Unpacked ${path.basename(file)}`);
                 }
-                console.log(`Unpacked ${path.basename(file)}`)
             }
             else console.error(stderr)
         })

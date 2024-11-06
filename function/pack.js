@@ -3,7 +3,8 @@ import { exec } from "child_process";
 import { parse, stringify } from "yaml";
 import { readFile, writeFile, stat, readdir, mkdir } from 'fs/promises';
 import { existsSync } from "fs";
-import ClassFeatList from "../model/cls_feat.js";
+import { forEach, groupBy, has, omit, keys, filter } from "lodash-es";
+import { ModelTypes } from "../util/modelTypes.js";
 
 export default async function packTo2DA(params) {
     const project = params[0];
@@ -13,6 +14,7 @@ export default async function packTo2DA(params) {
     let projectIdentifier;
     if(stats.isDirectory()) {
         projectRoot = path.resolve(project)
+        filterType = params[1];
     }
     else if(stats.isFile() && project.toLowerCase().endsWith(".yml")) {
         projectRoot = path.dirname(path.resolve(project))
@@ -41,68 +43,96 @@ export default async function packTo2DA(params) {
         }))
         .then(files => files.filter(file => !filterType || file.contents.yamlType === filterType));
 
-    const context = {
-        files: {
-            cls_feat: {},
-        }
-    };
-
-    if(!filterType || filterType === "cls_feat") {
-        let classFeatLists = projectFiles
-            .filter(file => file.contents.yamlType === "cls_feat")
-            .map(file => {
+    const unloadedFiles = omit(
+        groupBy(
+            projectFiles.map(file => {
                 const result = {
-                        ...file.contents,
-                        identifier: file.contents.identifier || file.filename.replace('.yml', ''),
-                    };
+                    ...file.contents,
+                    identifier: file.contents.identifier || file.filename.replace('.yml', ''),
+                }
                 return result;
-            })
-        const loadedClassFeatLists = [];
-        let previous = 0;
-        while(classFeatLists.length != previous) {
-            const nextBatch = classFeatLists.filter(list => (list.imports || []).every(dependency => Object.keys(context.files.cls_feat).includes(dependency)));
-            nextBatch.forEach(list => ClassFeatList.postLoad(list, context));
-            loadedClassFeatLists.push(...nextBatch);
+            }),
+            file => file.yamlType || 'unknown',
+        ),
+        'unknown'
+    );
 
-            previous = classFeatLists.length;
-            classFeatLists = classFeatLists.filter(list => !loadedClassFeatLists.includes(list));
+    const outputFolder = path.join(projectRoot, 'packed');
+    if(!existsSync(outputFolder))
+        await mkdir(outputFolder)
+
+    const context = {
+        files: {},
+    };
+    forEach(unloadedFiles, (type, typeName) => {
+        const handler = ModelTypes[typeName];
+        if(!handler)
+            return;
+
+        context.files[typeName] = {};
+        let files = type;
+        let previous = 0;
+        const loadedFiles = [];
+        while(files.length != previous) {
+            const nextBatch = files.filter(file => (file.imports || []).every(dependency => has(context.files[typeName], dependency)));
+            nextBatch.forEach(file => handler.postLoad(file, context));
+            loadedFiles.push(...nextBatch);
+
+            previous = files.length;
+            files = files.filter(file => !loadedFiles.includes(file));
         }
 
-        if(classFeatLists.length != 0) {
-            const missingDependencies = classFeatLists
-                .flatMap(list => list.imports.filter(dependency => !Object.keys(context.files.cls_feat).includes(dependency)))
+        if(files.length != 0) {
+            const missingDependencies = files
+                .flatMap(list => list.imports.filter(dependency => has(context.files[typeName], dependency)))
                 .reduce((results, dependency) => {
                     if(!results.includes(dependency))
                         results.push(dependency)
                     return results;
                 }, []);
-            throw new ReferenceError(`One or more dependencies were not found in the project! Either they do not exist, or there is a circular dependency somewhere!
+            throw new ReferenceError(`One or more dependencies of type ${typeName} were not found in the project! Either they do not exist, or there is a circular dependency somewhere!
                 
 Unresolved dependencies: ${JSON.stringify(missingDependencies)}`);
         }
 
-        const outputFolder = path.join(projectRoot, 'packed');
-        if(!existsSync(outputFolder))
-            await mkdir(outputFolder)
-        Object.values(context.files.cls_feat).forEach(async featList => {
-            if(featList.generateOutput || featList.identifier === projectIdentifier) {
-                const packedList = {
-                    file_type: "2DA ",
-                    file_version: "V2.0",
-                    columns: [ "FeatLabel", "FeatIndex", "List", "GrantedOnLevel", "OnMenu" ],
-                    rows: ClassFeatList.pack(featList),
-                }
-                const outputPath = path.join(outputFolder, `${featList.identifier}.2da`);
-                await writeFile(outputPath, stringify(packedList));
+        forEach(context.files, async (type, typeName) => {
+            const handler = ModelTypes[typeName];
+            if(!handler)
+                return;
+
+            if(handler.hasMultipleFiles) {
+                forEach(type, async file => {
+                    if(file.generateOutput || file.identifier === projectIdentifier) {
+                        const packedFile = handler.pack(file);
+                        const outputPath = path.join(outputFolder, `${file.identifier}.2da`);
+                        await writeFile(outputPath, stringify(packedFile));
+                        const nwn2da = exec(`nwn-2da -o "${outputPath}" -O 2da-mini -I yaml "${outputPath}"`);
+                        nwn2da.on("spawn", () => {
+                            //console.log(nwn2da.spawnargs)
+                        })
+                        nwn2da.on("close", (code) => {
+                            if(!code)
+                                console.log(`Wrote ${file.identifier}.2da`)
+                        })
+                    }
+                })
+            }
+            else {
+                const packedFile = handler.pack(type);
+                const outputPath = path.join(outputFolder, `${typeName}.2da`);
+                await writeFile(outputPath, stringify(packedFile));
                 const nwn2da = exec(`nwn-2da -o "${outputPath}" -O 2da-mini -I yaml "${outputPath}"`);
                 nwn2da.on("spawn", () => {
                     //console.log(nwn2da.spawnargs)
                 })
                 nwn2da.on("close", (code) => {
-                    if(!code)
-                        console.log(`Wrote ${featList.identifier}.2da`)
+                    if(!code) {
+                        const rowCount = keys(filter(type, file => file.id !== undefined));
+                        const paddingCount = packedFile.rows.length - rowCount;
+                        console.log(`Wrote ${rowCount} entries and ${paddingCount} blank rows to ${typeName}.2da, finishing on ID ${packedFile.rows.length-1}`)
+                    }
                 })
             }
         })
-    }
+    })
 }

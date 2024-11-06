@@ -1,0 +1,34 @@
+yamlType: race_feat
+feats:
+  Knockdown: 2878
+  DisarmMain: 2879
+  DisarmOff: 2912
+  FightDefensively: 2883
+  CreateDiversion: 2885
+  ShieldBash: 2859
+  Grapple: 2876
+  GrappleEscape: 2900
+  GrapplePin: 2901
+  GrappleExecute: 2902
+  GrappleIncap: 2903
+  ActionTumble: 2935
+  ActionJump: 2936
+  ActionLunge: 2526
+  ActionPommelStrike: 2525
+  ActionAidOther1: 2518
+  ActionAidOther2: 2517
+  ActionDemoralize: 2376
+  ActionAppraise: 2359
+  ActionToggleLight: 2358
+  SkillSynergies: 3933
+  CooldownFixer: 3934
+  ControlHenchAtk: 4065
+  ControlHenchMov: 4063
+  SelectHench: 4064
+  RecallHench: 3945
+  Attack: 3988
+  ExpToggle: 4099
+  Charge: 2852
+  ArmEquipLgt: 3
+  ArmEquipMed: 4
+  ArmEquipHvy: 5
