@@ -4,7 +4,7 @@
   "description": "Autogenerates a 2DA file from a specification written in YAML. Currently only supports the cls_feat_*.2da and race_feat_*.2da families.",
   "main": "yaml2da.js",
   "author": "DaloLorn",
-  "license": "MPL 2.0",
+  "license": "MIT",
   "dependencies": {
     "lodash-es": "^4.17.21",
     "yaml": "^2.5.0"
