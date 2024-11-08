@@ -1,0 +1,42 @@
+# This indicates this file is a YAML2DA schema.
+yamlType: schema
+
+# This is the `yamlType` value corresponding to this schema.
+# All files with a `yamlType` equal to this `typeName` will 
+# be loaded using this schema, and they will be exported into
+# `${typeName}.2da`.
+# Reserved keywords:
+# - schema (ignored)
+# - unknown (ignored)
+# - load (ignored, with a warning)
+typeName: bgcraft_herbs
+
+# If this 2DA column is blank (****) for a row,
+# that row is interpreted as padding and will not generate a file.
+criticalColumn: Identifier
+
+# Maps 2DA column labels to YAML2DA field names ("aliases").
+columns:
+  # Can be either a simple `2DALabel: YAMLAlias` mapping...
+  Label: label
+  Identifier: harvestGroup
+  Skill: skill
+  HarvestDC: harvestDC
+  
+  # Or it can be an object with some additional metadata:
+  MaxHarvests:
+    # If this field exists and is truthy,
+    # a 2DA missing this column will still be accepted
+    # as matching this schema's specifications.
+    optional: false
+    # The alias to use for this column in YAML2DA files.
+    alias: maxHarvests
+  
+  XPReward: xpReward
+  OutputResRef: outputResRef
+  OutputResRef2: outputResRef2
+  OutputResRef3: outputResRef3
+  Ethereal: ethereal
+  MsgSuccess: msgSuccess
+  MsgFailCheck: msgFailCheck
+  MsgCooldown: msgCooldown

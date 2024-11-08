@@ -7,6 +7,7 @@ const ClassFeatList = {
     unpack: unpack,
     postLoad: postLoad,
     hasMultipleFiles: true,
+    typeName,
 };
 export default ClassFeatList;
 
@@ -17,19 +18,20 @@ const columns = [
     "GrantedOnLevel",
     "OnMenu",
 ];
+const typeName = "cls_feat"
 
 function postLoad(file, context) {
     const result = file;
-    if(Object.keys(context.files.cls_feat).includes(file.identifier))
+    if(Object.keys(context.files[typeName]).includes(file.identifier))
         throw new ReferenceError(`Class feat list identifier ${file.identifier} is declared twice! Remember that files without an explicit "identifier" field will use their filename as an identifier!`);
 
     (file.imports || []).forEach((dependency) => {
         // This check shouldn't fail, but leaving it in just in case!
-        if(!Object.keys(context.files.cls_feat).includes(dependency)) {
+        if(!Object.keys(context.files[typeName]).includes(dependency)) {
             throw new ReferenceError(`Dependency ${dependency} for class feat list ${file.identifier} not found in project! Either it does not exist, or there is a circular dependency somewhere!`);
         }
 
-        Object.entries(context.files.cls_feat[dependency].levels).forEach(([levelNumber, level]) => {                
+        Object.entries(context.files[typeName][dependency].levels).forEach(([levelNumber, level]) => {                
             const resultLevel = result.levels[levelNumber] || {};
             if(!resultLevel)
                 result.levels[levelNumber] = resultLevel;
@@ -57,7 +59,7 @@ function postLoad(file, context) {
         })
     })
 
-    context.files.cls_feat[result.identifier] = result;
+    context.files[typeName][result.identifier] = result;
 }
 
 function validate(list) {
@@ -65,7 +67,7 @@ function validate(list) {
         return columns.every(column => list.columns?.includes(column));
     }
     else {
-        return list.yamlType === "cls_feat";
+        return list.yamlType === typeName;
     }
 }
 
@@ -178,7 +180,7 @@ function unpack(list) {
         levels[levelNumber] = pickBy(level);
     })
     return {
-        yamlType: "cls_feat",
+        yamlType: typeName,
         levels,
         generateOutput: true,
     };

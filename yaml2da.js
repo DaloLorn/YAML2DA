@@ -1,35 +1,34 @@
-import { argv as args } from 'process';
-import { parse, stringify } from 'yaml';
-import help from './function/help.js';
 import packTo2DA from './function/pack.js';
 import unpackFrom2DA from './function/unpack.js';
+import { getopt } from 'stdio';
 
-if(args.length < 3) {
-    help();
+const options = getopt({
+    import: {
+        key: "i", description: "Tells YAML2DA to import data from 2DAs instead of exporting from YAML.",
+    },
+    outputFolder: {
+        key: "o", description: "Specifies an output folder. Defaults to '{projectFolder}/packed' in export mode, or '{projectFolder}/unpacked' in import mode.", args: 1
+    },
+    filterType: {
+        key: "f", description: "Only import/export files of the specified type(s), e.g. cls_feat, race_feat, classes. Exports check the yamlType field, imports test the 2DA schema. Ignored when exporting single files, and single-file imports instead use it to coerce the 2DA to a specific type.", args: "*", default: []
+    },
+    schema: {
+        key: "s", description: "Path to additional schema files to be loaded after defaultSchemas.yml. Exports also automatically load all files in the project folder with a yamlType of 'schema'. Note that 'defaultSchemas' is a reserved name and will not be loaded.", args: "*", default: []
+    },
+    _meta_: { args: 1 },
+})
+
+// Do some quick preprocessing on parameters, for internal consistency.
+if(typeof options.filterType === "string")
+    options.filterType = [options.filterType]
+if(typeof options.schema === "string")
+    options.schema = [options.schema]
+
+console.log(options)
+
+if(options.import) {
+    await unpackFrom2DA(options)
 }
-else if(args.length < 4) {
-    // ... We don't have any other no-args commands yet, so show help again anyway?
-    // if(args[2].toLowerCase() === 'help')
-        help();
-} 
 else {
-    switch(args[2].toLowerCase()) {
-        case 'convert':
-        case 'build':
-        case 'finalize':
-        case 'pack':
-        case 'to2da': 
-        case 'export':
-            await packTo2DA(args.slice(3));
-            break;
-        case 'help':
-            console.info("Silly user, help doesn't take any parameters! Here you go, though:\n");
-            help();
-            break;
-        case 'prepare':
-        case 'unpack':
-        case 'import':
-        case 'from2da':
-            await unpackFrom2DA(args.slice(3));
-    }
+    await packTo2DA(options)
 }

@@ -3,24 +3,25 @@ import { exec } from "child_process";
 import { parse, stringify } from "yaml";
 import { readFile, writeFile, stat, readdir, mkdir } from 'fs/promises';
 import { existsSync } from "fs";
-import { forEach, groupBy, has, omit, keys, filter } from "lodash-es";
-import { ModelTypes } from "../util/modelTypes.js";
+import { forEach, groupBy, has, omit, filter, merge } from "lodash-es";
+import ModelTypes from "../util/modelTypes.js";
 
-export default async function packTo2DA(params) {
-    const project = params[0];
+export default async function packTo2DA(options) {
+    const { outputFolder: customOutputFolder, filterType, schema, args } = options;
+    const project = args[0];
     const stats = await stat(project);
     let projectRoot;
-    let filterType;
+    let filterTypes;
     let projectIdentifier;
     if(stats.isDirectory()) {
         projectRoot = path.resolve(project)
-        filterType = params[1];
+        filterTypes = filterType;
     }
     else if(stats.isFile() && project.toLowerCase().endsWith(".yml")) {
         projectRoot = path.dirname(path.resolve(project))
         const targetFile = parse(await readFile(project), 'utf-8');
-        filterType = targetFile.yamlType;
-        if(!filterType) {
+        filterTypes = [targetFile.yamlType];
+        if(!filterTypes) {
             throw new TypeError("The specified file is not a YAML2DA file!")
         }
         projectIdentifier = targetFile.identifier || path.basename(project).toLowerCase().replace(".yml", "");
@@ -41,7 +42,14 @@ export default async function packTo2DA(params) {
             }
             return result
         }))
-        .then(files => files.filter(file => !filterType || file.contents.yamlType === filterType));
+        .then(files => files.filter(file => !filterTypes?.length || [...filterTypes, 'schema'].includes(file.contents.yamlType)));
+    const schemaFiles = await Promise.all(schema.map(async file => {
+        const loadedFile = parse(await readFile(file, 'utf-8'));
+        return {
+            ...loadedFile,
+            identifier: loadedFile.identifier || file,
+        }
+    }))
 
     const unloadedFiles = omit(
         groupBy(
@@ -57,34 +65,48 @@ export default async function packTo2DA(params) {
         'unknown'
     );
 
-    const outputFolder = path.join(projectRoot, 'packed');
+    merge(schemaFiles, unloadedFiles.schema);
+    const otherFiles = omit(unloadedFiles, 'schema');
+    if(!otherFiles) {
+        console.error("No files were found for the requested filter(s). Please check your filters and make sure you're exporting the right folder!");
+        return;
+    }
+
+    const outputFolder = customOutputFolder || path.join(projectRoot, 'packed');
     if(!existsSync(outputFolder))
         await mkdir(outputFolder)
 
     const context = {
         files: {},
     };
-    forEach(unloadedFiles, (type, typeName) => {
+
+    let exported = false;
+    forEach(otherFiles, (type, typeName) => {
         const handler = ModelTypes[typeName];
         if(!handler)
             return;
+        // If we have a handler for at least one of our files,
+        // then either we'll throw an error or we'll write something!
+        exported = true; 
+
+        const includeType = handler.hasMultipleFiles ? "imports" : "inherits";
 
         context.files[typeName] = {};
         let files = type;
         let previous = 0;
         const loadedFiles = [];
         while(files.length != previous) {
-            const nextBatch = files.filter(file => (file.imports || []).every(dependency => has(context.files[typeName], dependency)));
+            const nextBatch = files.filter(file => (file[includeType] || []).every(dependency => has(context.files[typeName], dependency)));
             nextBatch.forEach(file => handler.postLoad(file, context));
             loadedFiles.push(...nextBatch);
 
             previous = files.length;
-            files = files.filter(file => !loadedFiles.includes(file));
+            files = files.filter(file => !loadedFiles.find(entry => entry.identifier == file.identifier));
         }
 
         if(files.length != 0) {
             const missingDependencies = files
-                .flatMap(list => list.imports.filter(dependency => has(context.files[typeName], dependency)))
+                .flatMap(list => list[includeType].filter(dependency => has(context.files[typeName], dependency)))
                 .reduce((results, dependency) => {
                     if(!results.includes(dependency))
                         results.push(dependency)
@@ -127,7 +149,7 @@ Unresolved dependencies: ${JSON.stringify(missingDependencies)}`);
                 })
                 nwn2da.on("close", (code) => {
                     if(!code) {
-                        const rowCount = keys(filter(type, file => file.id !== undefined));
+                        const rowCount = filter(type, file => file.id !== undefined).length;
                         const paddingCount = packedFile.rows.length - rowCount;
                         console.log(`Wrote ${rowCount} entries and ${paddingCount} blank rows to ${typeName}.2da, finishing on ID ${packedFile.rows.length-1}`)
                     }
@@ -135,4 +157,6 @@ Unresolved dependencies: ${JSON.stringify(missingDependencies)}`);
             }
         })
     })
+    if(!exported) 
+        console.error("No exportable files were found. Please make sure you have provided complete schema(s) for your project.")
 }

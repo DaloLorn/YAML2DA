@@ -1,13 +1,15 @@
 import path from "path";
 import { exec } from "child_process";
 import { parse, stringify } from "yaml";
-import { writeFile, stat, readdir, mkdir } from "fs/promises";
+import { writeFile, stat, readdir, readFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
-import { find } from "lodash-es";
-import { ModelTypes } from "../util/modelTypes.js";
+import { find, forEach } from "lodash-es";
+import ModelTypes from "../util/modelTypes.js";
+import { promisify } from "util";
 
-export default async function unpackFrom2DA(params) {
-    const project = params[0];
+export default async function unpackFrom2DA(options) {
+    const { outputFolder: customOutputFolder, filterType: filterTypes, schema, args } = options;
+    const project = args[0];
     const stats = await stat(project);
     let projectRoot;
     let projectFiles;
@@ -24,26 +26,51 @@ export default async function unpackFrom2DA(params) {
     else {
         throw new TypeError("The specified path is neither a 2DA file nor a folder!");
     }
-    const outputFolder = path.join(projectRoot, "unpacked");
+    const outputFolder = customOutputFolder || path.join(projectRoot, "unpacked");
     if(!existsSync(outputFolder))
         await mkdir(outputFolder)
 
+    const schemaFiles = await Promise.all(schema.map(async file => {
+        const loadedFile = parse(await readFile(file, 'utf-8'));
+        return {
+            ...loadedFile,
+            identifier: loadedFile.identifier || file,
+        }
+    }))
+    forEach(schemaFiles, ModelTypes.load)
 
-    projectFiles.forEach(file => {
-        const outputFile = path.join(outputFolder, `${path.basename(file.toLowerCase(), ".2da")}.yml`)
-        const nwn2da = exec(`nwn-2da -O yaml "${file}"`, async (error, output, stderr) => {
-            if(!error) {
-                const parsed2DA = parse(output);
-                const handler = find(ModelTypes, handler => handler.validate(parsed2DA));
-                if(handler) {
-                    await writeFile(outputFile, stringify(handler.unpack(parsed2DA)));
-                    console.log(`Unpacked ${path.basename(file)}`);
-                }
+    let imported = false;
+    await Promise.all(projectFiles.map(async file => {
+        const execPromise = promisify(exec);
+        const {stdout: output, stderr: error} = await execPromise(`nwn-2da -O yaml "${file}"`)
+        if(!error) {
+            const parsed2DA = parse(output);
+            const handler = find(ModelTypes, handler => handler.validate && handler.validate(parsed2DA) && (!filterTypes?.length || filterTypes.includes(handler.typeName)));
+            if(!handler)
+                return;
+            // If we have a handler for at least one of our files,
+            // then either we'll throw an error or we'll write something!
+            imported = true; 
+
+            if(handler.hasMultipleFiles) {
+                const outputFile = path.join(outputFolder, `${path.basename(file.toLowerCase(), ".2da")}.yml`)
+                await writeFile(outputFile, stringify(handler.unpack(parsed2DA)));
+                console.log(`Unpacked ${path.basename(file)}`);
             }
-            else console.error(stderr)
-        })
-        nwn2da.on("spawn", () => {
-            //console.log(nwn2da.spawnargs)
-        })
-    })
+            else {
+                const outputSubfolder = path.join(outputFolder, path.basename(file.toLowerCase(), ".2da"));
+                if(!existsSync(outputSubfolder))
+                    await mkdir(outputSubfolder)
+                const unpackedRows = handler.unpack(parsed2DA);
+                await unpackedRows.forEach(async row => {
+                    const outputFile = path.join(outputSubfolder, `${row.id}.yml`);
+                    writeFile(outputFile, stringify(row));
+                })
+                console.log(`Unpacked ${unpackedRows.length} out of ${parsed2DA.rows.length} rows from ${path.basename(file)} (omitted rows were interpreted as padding)`)
+            }
+        }
+        else console.error(error)
+    }))
+    if(!imported) 
+        console.error("No importable files were found. Please check your filters, and make sure you have provided complete schema(s) for your project using the --schema parameter.")
 }

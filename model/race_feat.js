@@ -8,6 +8,7 @@ const RaceFeatList = {
     unpack: unpack,
     postLoad: postLoad,
     hasMultipleFiles: true,
+    typeName,
 };
 export default RaceFeatList;
 
@@ -15,24 +16,25 @@ const columns = [
     "FeatLabel",
     "FeatIndex",
 ];
+const typeName = "race_feat";
 
 function postLoad(file, context) {
     const result = file;
-    if(Object.keys(context.files.race_feat).includes(file.identifier))
+    if(Object.keys(context.files[typeName]).includes(file.identifier))
         throw new ReferenceError(`Racial feat list identifier ${file.identifier} is declared twice! Remember that files without an explicit "identifier" field will use their filename as an identifier!`);
 
     (file.imports || []).forEach((dependency) => {
         // This check shouldn't fail, but leaving it in just in case!
-        if(!Object.keys(context.files.race_feat).includes(dependency)) {
+        if(!Object.keys(context.files[typeName]).includes(dependency)) {
             throw new ReferenceError(`Dependency ${dependency} for racial feat list ${file.identifier} not found in project! Either it does not exist, or there is a circular dependency somewhere!`);
         }
 
-        Object.entries(context.files.race_feat[dependency].feats).forEach(([label, id]) => {
+        Object.entries(context.files[typeName][dependency].feats).forEach(([label, id]) => {
             addYAMLEntry(id, label, result.feats)
         })
     })
 
-    context.files.race_feat[result.identifier] = result;
+    context.files[typeName][result.identifier] = result;
 }
 
 function validate(list) {
@@ -42,7 +44,7 @@ function validate(list) {
         return columns.every(column => list.columns?.includes(column)) && !ClassFeatList.validate(list);
     }
     else {
-        return list.yamlType === "race_feat";
+        return list.yamlType === typeName;
     }
 }
 
@@ -96,7 +98,7 @@ function unpack(list) {
         addYAMLEntry(Number(row[FeatIndex]), row[FeatLabel], feats);
     })
     return {
-        yamlType: "race_feat",
+        yamlType: typeName,
         feats,
         generateOutput: true,
     };

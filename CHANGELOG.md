@@ -1,0 +1,85 @@
+# YAML2DA Changelog
+
+## 0.1.0
+
+- Initial release featuring support for class feat lists.
+
+### 0.1.1
+
+- Added missing nwn-2da executable. Oops.
+- Upgraded to nwn-2da 0.3.7 while I was at it, for stability.
+- Added support for race_feat_*.2da files, with accompanying YAML samples.
+- Laid some of the groundwork for single-file 2DAs such as classes.2da or spells.2da.
+- Updated licensing from MPL 2.0 to MIT.
+  
+  It occurred to me that I do not (and to some extent cannot) support arbitrary schema extensions, which would, by the terms of the original license, mean that anyone who needs to add/modify schemas would have to open-source those.
+  
+  Granted, I'd still appreciate if *technical* improvements were sent back upstream, and 2DAs tend to become somehow publicly readable anyway... but I don't think I should be forcing that decision on people.
+
+## 0.2.0
+
+- Completely overhauled command-line interface more akin to nwn-lib.
+    - Parameters no longer need to be provided in a specific order in order to work.
+    - An input file/folder path must always be provided.
+    - The application now defaults to export mode (equivalent to the old `convert`, `build`, `finalize`, `pack`, `to2da`, or `export` commands).
+    - The `--import` (`-i`) option tells YAML2DA to run in import mode (equivalent to the old `prepare`, `unpack`, `import`, or `from2da` commands).
+    - The `--filterType` (`-f`) option accepts a `yamlType` value (e.g. `cls_feat`), equivalent to passing a second parameter to the old `pack` command.
+    - The `--help` (`-h`) option displays a list of possible options.
+- Exporter can filter by more than one `yamlType` now, by providing multiple values for `--filterType`.
+- Importer can now use `--filterType` to filter out 2DAs incompatible with a given list of `yamlType`s.
+- Both import and export modes now allow for a custom output folder via `--outputFolder` (`-o`), simplifying their integration into existing release automation.
+- Added support for user-defined single-file schemas!
+    - Although these only provide a direct column-to-field mapping of 2DA rows to YAML objects, the resulting YMLs still support the rest of the YAML2DA featureset (most notably inheritance).
+    - The `imports` field for these single-file schemas is replaced by `inherits`.
+        - Where `imports` merged the dependencies into the final file, `inherits` uses the parent's fields as default values instead of defaulting to `****`.
+        - Inheritance is applied sequentially, from top to bottom, with each new ancestor overriding the previous one. For instance, if `ethereal_herb` defines a field `ethereal: 1`, and `non_ethereal_herb` defines a field `ethereal: null`, then a file specifying `inherits: [ethereal_herb, non_ethereal_herb]` will resolve to `ethereal: null` unless it explicitly specifies a value for `ethereal`.
+    - Single-file schemas also include a mandatory `id` field representing the row ID. 
+        - If left blank (or otherwise not coercible to an integer), the file's contents will not be included in the exported 2DA!
+        - Row IDs must be unique across the project for any given schema.
+        - Row IDs do not need to be contiguous: Empty rows will be inserted as necessary to maintain table integrity between exports. (For instance, a spell file with ID 10 will always be printed to spells.2da row 10, regardless of whether any spells were defined with IDs 0-9.)
+    - Exporting a project to 2DA will automatically search for custom schemas within the project folder. Additionally, the `--schema` (`-s`) option can be used to specify the locations of extra schema files not inside the project folder; this is also the only way to use a custom schema when importing 2DAs!
+    - For easier use, single-file schemas are imported into a subfolder with the same name as the source file. YAML2DA does not enforce any specific folder structure or file naming scheme, however, so you are free to do what you want after import!
+    - Custom schemas with a `yamlType` of `load`, `schema`, or `unknown` will not be loaded.
+    - As a performance optimization, custom schemas will not be loaded from any schema file whose identifier is either implicitly or explicitly set to `defaultschemas`, in case you accidentally tell YAML2DA to reload the default schema file.
+        - Reminder: Any YAML2DA file without an `identifier` field will use the file's lowercased name (e.g. `defaultSchemas.yml` becomes `defaultschemas`) instead.
+    - Schema includes/inheritance are not currently supported. Sorry!
+- Defined default schemas for *a lot* of single-file 2DAs:
+    - accessories
+    - ambientMusic
+    - ambientSound
+    - ammunitionTypes
+    - appearance
+    - appearancesndset
+    - areaeffects
+    - armor
+    - armorrulestats
+    - backgrounds
+    - baseitems
+    - classes
+    - disease
+    - domains
+    - doortypes
+    - effecticons
+    - feat
+    - genericdoors
+    - hen_companion
+    - hen_familiar
+    - itempropdef
+    - nwn2_deities
+    - packages
+    - placeableobjsnds
+    - placeables
+    - poison
+    - polymorph
+    - racialsubtypes
+    - racialtypes
+    - skills
+    - sneakfeats (defined by xp_dae plugin)
+    - sneakgroups (defined by xp_dae plugin)
+    - spells
+    - tailmodel
+    - traps
+    - vfx_persistent
+    - visualeffects
+    - weaponsounds
+    - wingmodel

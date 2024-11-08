@@ -13,6 +13,9 @@ imports:
 # Optional identifier used instead of the filename when:
 # - Resolving imports (e.g. this file would now be imported as `cls_feat_cavalier` instead of `cls_feat_caval`)
 # - Naming generated 2DAs when exporting the project (this file will now export as `cls_feat_cavalier.2da`)
+# NOTE: Filenames are fully lowercased when generating implicit identifiers.
+# The only way to use uppercase characters in a file's identifier is to
+# explicitly set this field.
 identifier: cls_feat_cavalier 
 
 # If absent or set to false, no 2DAs will be generated for this file

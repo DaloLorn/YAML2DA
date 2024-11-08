@@ -1,0 +1,1365 @@
+# This file contains default schemas for 2DA types where
+# each row is a self-contained object (e.g. a class, a feat).
+# These schemas can be overridden by redefining them
+# in your project folder.
+#
+# Note that 2DA imports do not search the project folder for 
+# schema files: You will need to specify a path to them yourself!
+#
+# Schemas not provided by your custom schema file(s) will instead
+# use the defaults provided by this file.
+#
+# Some 2DA types are structured such that each 2DA
+# is an object unto itself (e.g. cls_feat_*, race_feat_*).
+# For the time being, these require special handling
+# and will have their handlers defined wholly in JavaScript
+# in the `model` folder.
+# These handlers are then imported at the top of `util/modelTypes.js`.
+
+# This field is technically not needed for `defaultSchemas`, 
+# but never mind! It specifies that the file is a schema or schema list.
+yamlType: schema
+
+# List of schema definition. These will be loaded in sequential order.
+# No validation exists to prevent a schema from being overridden
+# from within the same file! You have been warned.
+#
+# In addition to this list, if you provide a `typeName` property,
+# YAML2DA will try to interpret the whole file as another
+# schema object.
+schemas: 
+  # This is the `yamlType` value corresponding to this schema.
+  # All files with a `yamlType` equal to this `typeName` will 
+  # be loaded using this schema, and written to `${typeName}.2da`.
+  # Reserved keywords:
+  # - schema (ignored)
+  # - unknown (ignored)
+  # - load (ignored, with a warning)
+  - typeName: accessories
+
+    # If the 2DA columns with these label are all blank (****) for a row,
+    # that row is interpreted as padding and will not generate a YAML file on import.
+    # If this field is absent, YAML2DA will be unable to recognize padding,
+    # and will indiscriminately import all rows in the 2DA unless they're completely blank.
+    criticalColumns: 
+      - label
+      - SEFResRef
+
+    # As `criticalColumns`, but only covers one column.
+    # There's not really any good reason (besides API docs!)
+    # to include both `criticalColumns` and `criticalColumn`
+    # in a single schema.
+    criticalColumn: SEFResRef
+
+    # Maps 2DA column labels to YAML2DA field names ("aliases").
+    columns:
+      # Can be either a simple `2DALabel: YAMLAlias` mapping...
+      label: label
+      SEFResRef: SEFResRef
+      Duration: duration
+      Category: category
+
+      # Or it can be an object with some additional metadata:
+      UseStrRef:
+        # If this field exists and is truthy,
+        # a 2DA missing this column will still be accepted
+        # as matching this schema's specifications.
+        optional: true
+
+        # The alias to use for this column in YAML2DA files.
+        alias: useStrRef
+
+  # Schema disabled for now.
+  # - typeName: accessories_cat
+  #   criticalColumn: type
+  #   columns:
+  #     type: type
+
+  # Schema disabled for now.
+  # - typeName: actions
+  #   criticalColumn: STRING_REF
+  #   columns:
+  #     LABEL: label
+  #     STRING_REF: strRef
+  #     ICONRESREF: iconResRef
+  #     TIMER: timer
+
+  - typeName: ambientMusic
+    criticalColumns:
+      - Description # Row 0, "(No Music Track)", is *not* padding, so we need a second column!
+      - Resource
+    columns:
+      Description: description
+      Resource: resource
+      Stinger1: stinger1
+      Stinger2: stinger2
+      Stinger3: stinger3
+      Label: label
+
+  - typeName: ambientSound
+    criticalColumns:
+      - Description
+      - Resource
+    columns:
+      Description: description
+      Resource: resource
+      PresetInstance0: presetInstance0
+      PresetInstance1: presetInstance1
+      PresetInstance2: presetInstance2
+      PresetInstance3: presetInstance3
+      PresetInstance4: presetInstance4
+      PresetInstance5: presetInstance5
+      PresetInstance6: presetInstance6
+      PresetInstance7: presetInstance7
+      DisplayName: displayName
+
+  - typeName: ammunitionTypes
+    criticalColumns:
+      - Model
+      - ProjSEF
+    columns:
+      label: label
+      Model: model
+      ShotSound: shotSound
+      ImpactSound: impactSound
+      ProjSEF: projSEF
+      RotationSpd: rotationSpd
+
+  - typeName: appearance
+    criticalColumns:
+      - NWN2_Model_Body
+      - NWN2_Model_Helm
+      - NWN2_Model_Head
+      - NWN2_Model_Hair
+      - NWN2_Head_Skeleton
+      - NWN2_Skeleton_File
+    columns:
+      LABEL: label
+      STRING_REF: strRef
+      BodyType: bodyType
+      Segments: segments
+      NWN2_Scale_X: scaleX
+      NWN2_Scale_Y: scaleY
+      NWN2_Scale_Z: scaleZ
+      NWN2_Model_Body: modelBody
+      NWN2_Model_Helm: modelHelm
+      NWN2_Model_Head: modelHead
+      NWN2_Model_Hair: modelHair
+      NWN2_Head_Skeleton: headSkeleton
+      NWN2_Skeleton_File: skeletonFile
+      NWN2_AccessorySize: accessorySize
+      NWN2_AccessoryType: accessoryType
+      ToolsetUseStubModel: toolsetUseStubModel
+      Mount: mount
+      NAME: name
+      RACE: race
+      ENVMAP: envMap
+      NWN2_BLOODTYPE: bloodType
+      MODELTYPE: modelType
+      WEAPONVISUALSCALE: weaponVisualScale
+      WEAPONATTACKDISTANCESCALE: weaponAttackDistanceScale
+      WING_TAIL_SCALE: wingTailScale
+      HELMET_SCALE_M: helmetScaleM
+      HELMET_SCALE_F: helmetScaleF
+      MOVERATE: moveRate
+      WALKDIST: walkDist
+      RUNDIST: runDist
+      PERSPACE: perSpace
+      CREPERSPACE: creperSpace
+      HEIGHT: height
+      HITDIST: hitDist
+      PREFATCKDIST: prefAtckDist
+      TARGETHEIGHT: targetHeight
+      ABORTONPARRY: abortOnParry
+      RACIALTYPE: racialType
+      HASLEGS: hasLegs
+      HASARMS: hasArms
+      PORTRAIT: portrait
+      SIZECATEGORY: sizeCategory
+      PERCEPTIONDIST: perceptionDist
+      FOOTSTEPTYPE: footstepType
+      SOUNDAPPTYPE: soundAppType
+      HEADTRACK: headTrack
+      HEAD_ARC_H: headArcH
+      HEAD_ARC_V: headArcV
+      HEAD_NAME: headName
+      BODY_BAG: bodyBag
+      TARGETABLE: targetable
+      SELECTION_CAPSULE: selectionCapsule
+      SELECTION_SIZE: selectionSize
+      SEF: SEF
+      BASENATAC: 
+        optional: true
+        alias: baseNatAC
+      BASENATDAM: 
+        optional: true
+        alias: baseNatDam
+
+  - typeName: appearancesndset
+    criticalColumn: Label
+    columns:
+      Label: label
+      ArmorType: armorType
+      WeapTypeL: weapTypeL
+      WeapTypeR: weapTypeR
+      WeapTypeS: weapTypeS
+      WeapTypeClsLw: weapTypeClsLw
+      WeapTypeClsH: weapTypeClsH
+      WeapTypeRch: weapTypeRch
+      MissIndex: missIndex
+      Looping: looping
+      FallFwd: fallFwd
+      FallBck: fallBck
+
+  - typeName: areaeffects
+    criticalColumn: SHAPE
+    columns:
+      LABEL: label
+      ID: tableId # Why does this field even exist? I mean, really.
+      SHAPE: shape
+      RADIUS: radius
+      WIDTH: width
+      LENGTH: length
+      ONENTER: onEnter
+      HEARTBEAT: heartbeat
+      ONEXIT: onExit
+
+  - typeName: armor
+    criticalColumn: BASEITEMSTATREF
+    columns:
+      ACBONUS: acBonus
+      DEXBONUS: dexBonus
+      ACCHECK: armorCheckPenalty
+      ARCANEFAILURE%: arcaneSpellFailure
+      WEIGHT: weight
+      COST: cost
+      DESCRIPTIONS: descriptions
+      BASEITEMSTATREF: baseItemStatRef
+      Label: label
+      Name: name
+      ToolsetName: toolsetName
+      Prefix: prefix
+      Parent: parent
+
+  - typeName: armorrulestats
+    criticalColumn: BASEITEMSTATREF
+    columns:
+      Label: label
+      ACBONUS: acBonus
+      MAXDEXBONUS: maxDexBonus
+      ACHECK: armorCheckPenalty
+      ARCANEFAILURE%: arcaneSpellFailure
+      WEIGHT: weight
+      COST: cost
+      DESCRIPTIONS: descriptions
+      Name: name
+      BASEITEMSTATREF: baseItemStatRef
+
+  # Schema disabled for now.
+  # - typeName: armorvisualdata
+  #   criticalColumn: Prefix
+  #   columns:
+  #     Label: label
+  #     ToolsetName: toolsetName
+  #     Prefix: prefix
+  #     Parent: parent
+
+  - typeName: backgrounds
+    columns:
+      Label: label
+      Name: name
+      Description: description
+      Icon: icon
+      MINATTACKBONUS: minAttackBonus
+      MINSTR: minStr
+      MINDEX: minDex
+      MININT: minInt
+      MINWIS: minWis
+      MINCON: minCon
+      MINCHA: minCha
+      MAXSTR: maxStr
+      MAXDEX: maxDex
+      MAXINT: maxInt
+      MAXWIS: maxWis
+      MAXCON: maxCon
+      MAXCHA: maxCha
+      Gender: gender
+      OrReqClass0: orReqClass0
+      OrReqClass1: orReqClass1
+      OrReqClass2: orReqClass2
+      FeatGainedName: featGainedName
+      FeatGained: featGained
+      MasterFeatGainedName: masterFeatGainedName
+      MasterFeatGained: masterFeatGained
+      DisplayFeat: displayFeat
+      REMOVED: removed
+
+  - typeName: baseitems
+    criticalColumn: Name
+    columns:
+      Name: name
+      label: label
+      InvSlotWidth: invSlotWidth
+      InvSlotHeight: invSlotHeight
+      EquipableSlots: equipableSlots
+      CanRotateIcon: canRotateIcon
+      ModelType: modelType
+      NWN2_Anim: animation
+      ItemClass: itemClass
+      GenderSpecific: genderSpecific
+      Part1EnvMap: part1EnvMap
+      Part2EnvMap: part2EnvMap
+      Part3EnvMap: part3EnvMap
+      DefaultModel: defaultModel
+      NWN2_DefaultIcon: nwn2DefaultIcon
+      DefaultIcon: defaultIcon
+      Container: container
+      WeaponWield: weaponWield
+      WeaponType: weaponType
+      WeaponSize: weaponSize
+      RangedWeapon: rangedWeapon
+      PrefAttackDist: prefAttackDist
+      MinRange: minRange
+      MaxRange: maxRange
+      NumDice: numDice
+      DieToRoll: dieToRoll
+      CritThreat: critThreat
+      CritHitMult: critHitMult
+      Category: category
+      BaseCost: baseCost
+      Stacking: stacking
+      ItemMultiplier: itemMultiplier
+      Description: description
+      InvSoundType: invSoundType
+      MaxProps: maxProps
+      MinProps: minProps
+      PropColumn: propColumn
+      StorePanel: storePanel
+      ReqFeat0: reqFeat0
+      ReqFeat1: reqFeat1
+      ReqFeat2: reqFeat2
+      ReqFeat3: reqFeat3
+      ReqFeat4: reqFeat4
+      ReqFeat5: reqFeat5
+      AC_Enchant: acEnchant
+      BaseAC: baseAC
+      ArmorCheckPen: armorCheckPenalty
+      BaseItemStatRef: baseItemStatRef
+      ChargesStarting: chargesStarting
+      RotateOnGround: rotateOnGround
+      TenthLBS: tenthLbs
+      WeaponMatType: weaponMatType
+      AmmunitionType: ammunitionType
+      QBBehaviour: qbBehavior
+      ArcaneSpellFailure: arcaneSpellFailure
+      "%AnimSlashL": animSlash%L
+      "%AnimSlashR": animSlash%R
+      "%AnimSlashS": animSlash%S
+      StorePanelSort: storePanelSort
+      ILRStackSize: ilrStackSize
+      FEATImprCrit: featImprCrit
+      FEATWpnFocus: featWpnFocus
+      FEATWpnSpec: featWpnSpec
+      FEATEpicDevCrit: featEpicDevCrit
+      FEATEpicWpnFocus: featEpicWpnFocus
+      FEATEpicWpnSpec: featEpicWpnSpec
+      FEATOverWhCrit: featOverWhCrit
+      FEATWpnOfChoice: featWpnOfChoice
+      FEATGrtrWpnFocus: featGrtrWpnFocus
+      FEATGrtrWpnSpec: featGrtrWpnSpec
+      FEATPowerCrit: featPowerCrit
+      GMaterialType: gMaterialType
+      BaseItemSortOrder: baseItemSortOrder
+      
+  # Schema disabled for now.
+  # - typeName: bodybag
+  #   criticalColumn: Name
+  #   columns:
+  #     LABEL: label
+  #     Name: name
+  #     Appearance: appearance
+
+  # Schema disabled for now.
+  # - typeName: capart
+  #   columns:
+  #     NAME: name
+  #     MDLNAME: mdlName
+  #     NODENAME: nodeName
+
+  # NOTE: This 2DA appears to be 1-indexed for some reason. Approach with caution.
+  # Schema disabled for now.
+  # - typeName: categories
+  #   columns:
+  #     Category: category
+
+  # Schema disabled for now.
+  # - typeName: catype
+  #   columns:
+  #     NAME: name
+  #     TYPE: type
+  
+  # Schema disabled for now.
+  # - typeName: chargenClothes
+  #   columns:
+  #     ItemResRef: itemResRef
+
+  - typeName: classes
+    criticalColumn: Name
+    columns:
+      Label: label
+      Name: name
+      Plural: plural
+      Lower: lower
+      Description: description
+      Icon: icon
+      BorderedIcon: borderedIcon
+      HitDie: hitDie
+      AttackBonusTable: attackBonusTable
+      FeatsTable: featsTable
+      SavingThrowTable: savingThrowTable
+      SkillsTable: skillsTable
+      BonusFeatsTable: bonusFeatsTable
+      SkillPointBase: skillPointBase
+      SpellGainTable: spellGainTable
+      SpellKnownTable: spellKnownTable
+      PlayerClass: playerClass
+      SpellCaster: spellCaster
+      MetaMagicAllowed: metaMagicAllowed
+      MemorizesSpells: memorizesSpells
+      HasArcane: hasArcane
+      HasDivine: hasDivine
+      HasSpontaneousSpells: hasSpontaneousSpells
+      SpontaneousConversionTable: spontaneousConversionTable
+      SpellSwapMinLvl: spellSwapMinLvl
+      SpellSwapLvlInternal: spellSwapLvlInternal
+      SpellSwapLvlDiff: spellSwapLvlDiff
+      AllSpellsKnown: allSpellsKnown
+      HasInfiniteSpells: hasInfiniteSpells
+      HasDomains: hasDomains
+      HasSchool: hasSchool
+      HasFamiliar: hasFamiliar
+      HasAnimalCompanion: hasAnimalCompanion
+      Str: strength
+      Dex: dexterity
+      Con: constitution
+      Wis: wisdom
+      Int: intelligence
+      Cha: charisma
+      PrimaryAbil: primaryAbil
+      SpellAbil: spellAbil
+      AlignRestrict: alignRestrict
+      AlignRstrctType: alignRestrictType
+      InvertRestrict: invertRestrict
+      Constant: constant
+      EffCRLvl01: effCRLvl01
+      EffCRLvl02: effCRLvl02
+      EffCRLvl03: effCRLvl03
+      EffCRLvl04: effCRLvl04
+      EffCRLvl05: effCRLvl05
+      EffCRLvl06: effCRLvl06
+      EffCRLvl07: effCRLvl07
+      EffCRLvl08: effCRLvl08
+      EffCRLvl09: effCRLvl09
+      EffCRLvl10: effCRLvl10
+      EffCRLvl11: effCRLvl11
+      EffCRLvl12: effCRLvl12
+      EffCRLvl13: effCRLvl13
+      EffCRLvl14: effCRLvl14
+      EffCRLvl15: effCRLvl15
+      EffCRLvl16: effCRLvl16
+      EffCRLvl17: effCRLvl17
+      EffCRLvl18: effCRLvl18
+      EffCRLvl19: effCRLvl19
+      EffCRLvl20: effCRLvl20
+      PreReqTable: preReqTable
+      MaxLevel: maxLevel
+      XPPenalty: xpPenalty
+      BonusSpellcasterLevelTable: bonusSpellcasterLevelTable
+      BonusCasterFeatByClassMap: bonusCasterFeatByClassMap
+      ArcSpellLvlMod: arcSpellLvlMod
+      DivSpellLvlMod: divSpellLvlMod
+      EpicLevel: epicLevel
+      Package: package
+      FEATPracticedSpellcaster: featPracticedSpellcaster
+      FEATExtraSlot: featExtraSlot
+      FEATArmoredCaster: featArmoredCaster
+      FavoredWeaponProficiency: favoredWeaponProficiency
+      FavoredWeaponFocus: favoredWeaponFocus
+      FavoredWeaponSpecialization: favoredWeaponSpecialization
+      CharGen_Chest: charGenChest
+      CharGen_Feet: charGenFeet
+      CharGen_Hands: charGenHands
+      CharGen_Cloak: charGenCloak
+      CharGen_Head: charGenHead
+
+  # Omitting schemas for:
+  # - cls_atk
+  # - cls_bfeat
+  # - cls_bsplvl
+  # - cls_feat (already implemented)
+  # - cls_featmap
+  # - cls_pres
+  # - cls_savthr
+  # - cls_skill
+  # - cls_spgn
+  # - cls_spkn 
+  # - cls_spon
+  # - color
+  # These cannot be meaningfully described in the current YAML schema format.
+
+  # Schema disabled for now.
+  # - typeName: combatmodes
+  #   columns:
+  #     CombatMode: combatMode
+  #     ActivatedName: activatedName
+  #     DeactivatedName: deactivatedName
+  #     NeedsTarget: needsTarget
+
+  # Schema disabled for now.
+  # - typeName: container_preference
+  #   columns:
+  #     Label: label
+  #     Name: name
+
+  # Omitting schemas for:
+  # - crafting
+  # - crafting_index
+  # These cannot be meaningfully described in the current format, and may in fact
+  # need to be unified into a single YAML to cover both 2DAs.
+
+  # Schema disabled for now.
+  # - typeName: creaturesize
+  #   columns:
+  #     LABEL: label
+  #     ACATTACKMOD: acAttackMod
+  #     STRREF: strRef
+
+  # Schema disabled for now.
+  # - typeName: creaturespeed
+  #   columns:
+  #     Label: label
+  #     Name: name
+  #     2DAName: 2daName
+  #     WALKRATE: walkRate
+  #     RUNRATE: runRate
+
+  # Omitting schemas for:
+  # - crft_alch_* (no idea what the hell they even are)
+  # - crtemplates (why bother)
+  # - DMFI languages (needs custom handling)
+
+  # Schema disabled for now.
+  # - typeName: cursors
+  #   columns:
+  #     Label: label
+  #     ResRef: resRef
+  #     CursorID: cursorId
+
+  # Schema disabled for now.
+  # - typeName: damagehitvisual
+  #   columns:
+  #     Label: label
+  #     VisualEffectID: visualEffectId
+  #     RangedEffectID: rangedEffectId
+  
+  # NOTE: The game does not read this table from HAKs, only overrides.
+  # Schema disabled for now.
+  # - typeName: damagelevels
+  #   columns:
+  #     LABEL: label
+  #     STRING_REF: strRef
+  #     COLOR: color
+  #     BOLD: bold
+  #     DMG_LEVEL: dmgLevel
+
+  # Schema disabled for now.
+  # - typeName: damagereductins
+  #   columns:
+  #     LABEL: label
+  #     NAME: name
+
+  # Schema disabled for now.
+  # - typeName: defaultacsounds
+  #   columns:
+  #     Label: label
+  #     ArmorType: armorType
+
+  # Omitting schemas for:
+  # - des_* (no idea what the hell that is, but I don't think it's vanilla!)
+  # - diffsettings (needs custom handling)
+
+  - typeName: disease
+    criticalColumn: Name
+    columns:
+      Label: label
+      Name: name
+      First_Save: firstSave
+      Subs_Save: subsSave
+      Incu_Hours: incuHours
+      Dice_1: dice1
+      Dam_1: dam1
+      Type_1: type1
+      Dice_2: dice2
+      Dam_2: dam2
+      Type_2: type2
+      Dice_3: dice3
+      Dam_3: dam3
+      Type_3: type3
+      Type: type
+      End_Incu_Script: endIncuScript
+      24_Hour_Script: 24HourScript
+
+  - typeName: domains
+    criticalColumn: Name
+    columns:
+      Label: label
+      Name: name
+      Description: description
+      Icon: icon
+      Level_1: level1
+      Level_2: level2
+      Level_3: level3
+      Level_4: level4
+      Level_5: level5
+      Level_6: level6
+      Level_7: level7
+      Level_8: level8
+      Level_9: level9
+      GrantedFeat: grantedFeat
+      CastableFeat: castableFeat
+
+  - typeName: doortypes
+    criticalColumn: Label
+    columns:
+      Label: label
+      PlaceableModelType: placeableModelType
+      NWN2_ModelName: modelName
+      AttachedModelName: attachedModelName
+      NWN2_PartsCount: partsCount
+      NWN2_Skeleton: skeleton
+      Model: model
+      TileSet: tileSet
+      TemplateResRef: templateResRef
+      StringRefGame: stringRefGame
+      BlockSight: blockSight
+      VisibleModel: visibleModel
+      SoundAppType: soundAppType
+      SELECTION_SIZE: selectionSize
+      OpenTime: openTime
+
+  # Omitting schemas for:
+  # - effectanim (no idea what it does)
+
+  - typeName: effecticons
+    criticalColumns:
+      - Icon
+      - StrRef
+    columns:
+      Label: label
+      Icon: icon
+      StrRef: strRef
+
+  # Omitting schemas for:
+  # - encdifficulty
+  # - encumbrance (requires custom handler)
+  # - environment (meh)
+  # - epicattacks (requires custom handler)
+  # - epicsaves (requires custom handler)
+  # - eventtoolredirect (not sure what it's for)
+  # - excitedduration (ditto)
+  # - exptable (requires custom handler)
+  
+  - typeName: feat
+    criticalColumn: FEAT
+    columns:
+      LABEL: label
+      FEAT: name
+      DESCRIPTION: description
+      ICON: icon
+      MINATTACKBONUS: minAttackBonus
+      MINSTR: minStr
+      MINDEX: minDex
+      MININT: minInt
+      MINWIS: minWis
+      MINCON: minCon
+      MINCHA: minCha
+      MAXSTR: maxStr
+      MAXDEX: maxDex
+      MAXINT: maxInt
+      MAXWIS: maxWis
+      MAXCON: maxCon
+      MAXCHA: maxCha
+      MINSPELLLVL: minSpellLvl
+      MINCASTERLVL: minCasterLvl
+      PREREQFEAT1: prereqFeat1
+      PREREQFEAT2: prereqFeat2
+      GAINMULTIPLE: gainMultiple
+      EFFECTSSTACK: effectsStack
+      ALLCLASSESCANUSE: allClassesCanUse
+      CATEGORY: category
+      MAXCR: maxCR
+      SPELLID: spellId
+      SUCCESSOR: successor
+      CRValue: crValue
+      USESPERDAY: usesPerDay
+      USESMAPFEAT: usesMapFeat
+      MASTERFEAT: masterFeat
+      TARGETSELF: targetSelf
+      OrReqFeat0: orReqFeat0
+      OrReqFeat1: orReqFeat1
+      OrReqFeat2: orReqFeat2
+      OrReqFeat3: orReqFeat3
+      OrReqFeat4: orReqFeat4
+      OrReqFeat5: orReqFeat5
+      REQSKILL: reqSkill
+      ReqSkillMaxRanks: reqSkillMaxRanks
+      ReqSkillMinRanks: reqSkillMinRanks
+      REQSKILL2: reqSkill2
+      ReqSkillMaxRanks2: reqSkillMaxRanks2
+      ReqSkillMinRanks2: reqSkillMinRanks2
+      CONSTANT: constant
+      TOOLSCATEGORIES: toolsCategory
+      HostileFeat: hostileFeat
+      MinLevel: minLevel
+      MinLevelClass: minLevelClass
+      MaxLevel: maxLevel
+      MinFortSave: minFortSave
+      PreReqEpic: requireEpic
+      FeatCategory: featCategory
+      IsActive: isActive
+      IsPersistent: isPersistent
+      ToggleMode: toggleMode
+      Cooldown: cooldown
+      DMFeat: dmFeat
+      REMOVED: removed
+      AlignRestrict: alignRestrict
+      ImmunityType: immunityType
+      Instant: instant
+
+  # Omitting schemas for:
+  # - footstepsounds (meh)
+  # - fractionalcr (wtf)
+  # - ftext_styles (meh)
+  # - fw_cdaulepp_* (needs custom handling)
+  # - Game_Params (wtf)
+  # - gamespyrooms (meh)
+  # - gender (meh)
+  
+  - typeName: genericdoors
+    columns:
+      Label: label
+      StrRef: strRef
+      ModelName: modelName
+      BlockSight: blockSight
+      VisibleModel: visibleModel
+      SoundAppType: soundAppType
+      Name: name
+
+  # Omitting schemas for:
+  # - grass (meh)
+  
+  - typeName: hen_companion
+    columns:
+      NAME: name
+      BASERESREF_PREFIX: baseResRefPrefix
+      STRREF: strRef
+      DESCRIPTION: description
+      Range1: range1
+      Range2: range2
+      Range3: range3
+      Range4: range4
+      Range5: range5
+      Range6: range6
+      Range7: range7
+      Range8: range8
+      Range9: range9
+      Range10: range10
+      Range11: range11
+      Range12: range12
+      AvailableToPlayer: availableToPlayer
+      FeatID: featId
+
+  - typeName: hen_familiar
+    columns:
+      NAME: name
+      BASERESREF_PREFIX: baseResRefPrefix
+      STRREF: strRef
+      DESCRIPTION: description
+      FeatGained: featGained
+      Range1: range1
+      Range2: range2
+      Range3: range3
+      Range4: range4
+      Range5: range5
+      Range6: range6
+      Range7: range7
+      Range8: range8
+      Range9: range9
+      Range10: range10
+      AvailableToPlayer: availableToPlayer
+
+  # Omitting schemas for:
+  # - henchspells (wtf)
+  # - inventorysnds (meh)
+  # - iprp_* (mostly meh, and/or needs custom handling)
+  
+  - typeName: itempropdef
+    criticalColumn: Label
+    columns:
+      Name: name
+      Label: label
+      SubTypeResRef: subTypeResRef
+      Cost: cost
+      CostTableResRef: costTableResRef
+      Param1ResRef: param1ResRef
+      GameStrRef: gameStrRef
+      Description: description
+      Slots: slots
+
+  # Omitting schemas for:
+  # - itemprops (wtf)
+  # - itemtypes (wtf)
+  # - itemvalue (wtf)
+  # - itm_rand* (wtf)
+  # - itmwiz* (wtf)
+  # - keymap (meh)
+  # - lightcolor (meh)
+  # - loadhints (meh)
+  # - loadscreens (meh)
+  # - masterfeats (meh)
+  # - metamagic (meh)
+  # - metatiles (meh)
+  # - namefilter (meh)
+  # - nwconfig (meh)
+  # - nwconfig2 (meh)
+  # - NWN2_AlignIcons (meh)
+  # - nwn2_animcom (meh)
+  # - nwn2_animstan (meh)
+  # - NWN2_BehaviorParams (meh)
+  # - NWN2_BloodTypes (meh)
+  # - NWN2_Colors (meh)
+  
+  - typeName: nwn2_deities
+    criticalColumn: FirstName
+    columns:
+      FirstName: firstName
+      LastName: lastName
+      Removed: removed
+      NameStringref: nameStrRef
+      DescID: descId
+      IconID: iconId
+      AllRaces: allRaces
+      SubraceID1: subrace1
+      SubraceID2: subrace2
+      SubraceID3: subrace3
+      SubraceID4: subrace4
+      SubraceID5: subrace5
+      SubraceID6: subrace6
+      SubraceID7: subrace7
+      SubraceID8: subrace8
+      SubraceID9: subrace9
+      LG: hasLG
+      NG: hasNG
+      CG: hasCG
+      LN: hasLN
+      TN: hasTN
+      CN: hasCN
+      LE: hasLE
+      NE: hasNE
+      CE: hasCE
+      Male: hasMale
+      Female: hasFemale
+      Paladin: hasPaladins
+      Cleric: hasClerics
+      Druid: hasDruids
+      Doomguide: hasDoomguides
+      Ranger: hasRangers
+      DomainID1: domain1
+      DomainID2: domain2
+      DomainID3: domain3
+      DomainID4: domain4
+      DomainID5: domain5
+      DomainID6: domain6
+      DomainID7: domain7
+      DomainID8: domain8
+      DomainID9: domain9
+      FavoredWeaponProficiency: favoredWeaponProficiency
+      FavoredWeaponFocus: favoredWeaponFocus
+      FavoredWeaponSpecialization: favoredWeaponSpecialization
+
+  # Omitting schemas for:
+  # - NWN2_DMCommands (meh)
+  # - NWN2_Emotes (meh)
+  # - nwn2_icons (wtf)
+  # - nwn2_scriptsets (meh)
+  # - nwn2_tips (meh)
+  # - NWN2_VoiceMenu (meh)
+  # - nwnx_craft (uhhhh...?)
+  
+  - typeName: packages
+    criticalColumn: ClassID
+    columns:
+      Label: label
+      Name: name
+      Description: description
+      ClassID: classId
+      Attribute: attribute
+      Gold: gold
+      School: school
+      Domain1: domain1
+      Domain2: domain2
+      Associate: associate
+      SpellPref2DA: spellPref2DA
+      FeatPref2DA: featPref2DA
+      SkillPref2DA: skillPref2DA
+      Equip2DA: equip2DA
+      Soundset: soundset
+      PlayerClass: playerClass
+
+  # Omitting schemas for:
+  # - packeq* (single-column table)
+  # - packft* (meh)
+  # - packsk* (meh)
+  # - packsp* (meh)
+  # - parts_* (unreadable)
+  # - phenotype (meh)
+  
+  - typeName: placeableobjsnds
+    criticalColumn: ArmorType
+    columns:
+      Label: label
+      ArmorType: armorType
+      Opened: opened
+      Closed: closed
+      Destroyed: destroyed
+      Used: used
+      Locked: locked
+
+  - typeName: placeables
+    criticalColumn: NWN2_ModelName
+    columns:
+      Label: label
+      StrRef: strRef
+      PlaceableModelType: placeableModelType
+      Fade: fade
+      NWN2_ModelName: nwn2ModelName
+      NWN2_LowGore: nwn2lowGoreModel
+      NWN2_PartsCount: partsCount
+      NWN2_Skeleton: skeleton
+      AttachedModelName: attachedModelName
+      DefaultDoor: defaultDoor
+      DefaultAccessory: defaultAccessory
+      IsAccessory: isAccessory
+      ModelName: modelName
+      LightColor: lightColor
+      LightOffsetX: lightOffsetX
+      LightOffsetY: lightOffsetY
+      LightOffsetZ: lightOffsetZ
+      SoundAppType: soundAppType
+      ShadowSize: shadowSize
+      BodyBag: bodyBag
+      LowGore: lowGoreModel
+      Reflection: reflection
+      InterfacePT: interfacePT
+      BlockLOS: blockLOS
+      SELECTION_SIZE: selectionSize
+
+  # Omitted schemas for:
+  # - placeabletypes (meh)
+
+  - typeName: poison
+    criticalColumn: Save_DC
+    columns:
+      Label: label
+      Name: name
+      Save_DC: saveDC
+      Handle_DC: handleDC
+      Dice_1: dice1
+      Dam_1: dam1
+      Default_1: type1
+      Script_1: script1
+      Dice_2: dice2
+      Dam_2: dam2
+      Default_2: type2
+      Script_2: script2
+      Cost: cost
+      OnHitApplied: onHitApplied
+      VFX_Impact: impactVFX
+
+  - typeName: polymorph
+    criticalColumns:
+      - AppearanceResRef
+      - RacialType
+    columns:
+      Name: name
+      AppearanceResRef: appearanceResRef
+      RacialType: racialType
+      PortraitId: portraitId
+      Portrait: portrait
+      CreatureWeapon1: creatureWeapon1
+      CreatureWeapon2: creatureWeapon2
+      CreatureWeapon3: creatureWeapon3
+      HideItem: hideItem
+      Equipped: equipped
+      STR: strength
+      CON: constitution
+      DEX: dexterity
+      NATURALACBONUS: naturalACBonus
+      HPBONUS: hpBonus
+      SoundSet: soundSet
+      SPELL1: spell1
+      SPELL2: spell2
+      SPELL3: spell3
+      MergeW: mergeMainWeapon
+      MergeI: mergeAccessories
+      MergeA: mergeArmor
+
+  # Omitted schemas for:
+  # - portraits (meh)
+  # - pregen (meh)
+  # - prioritygroups (meh)
+  # - pvpsettings (meh)
+  # - race_feat_* (has custom handler)
+
+  - typeName: racialsubtypes
+    criticalColumn: BaseRace
+    columns:
+      Label: label
+      BaseRace: baseRace
+      ECL: levelAdjust
+      Abrev: abbreviation
+      Name: name
+      NamePlural: namePlural
+      NameLower: nameLower
+      NameLowerPlural: nameLowerPlural
+      ConverName: converName
+      ConverNameLower: converNameLower
+      Description: description
+      Appearance: appearance
+      StrAdjust: strAdjust
+      DexAdjust: dexAdjust
+      IntAdjust: intAdjust
+      ChaAdjust: chaAdjust
+      WisAdjust: wisAdjust
+      ConAdjust: conAdjust
+      Endurance: baseSpeed
+      Favored: favoredClass
+      HasFavoredClass: hasFavoredClass
+      FeatsTable: featsTable
+      Biography: defaultBio
+      PlayerRace: playerRace
+      Constant: constant
+      AGE: defaultAge
+      CRModifier: crModifier
+      Color2DA: color2DA
+      AppearanceIndex: appearanceIndex
+      female_race_icon: femaleIcon
+      male_race_icon: maleIcon
+      racial_banner: racialBanner
+
+  - typeName: racialtypes
+    criticalColumn: Abrev
+    columns:
+      Label: label
+      Abrev: abbreviation
+      Name: name
+      NamePlural: namePlural
+      NameLower: nameLower
+      NameLowerPlural: nameLowerPlural
+      ConverName: converName
+      ConverNameLower: converNameLower
+      Description: description
+      Appearance: appearance
+      StrAdjust: strAdjust
+      DexAdjust: dexAdjust
+      IntAdjust: intAdjust
+      ChaAdjust: chaAdjust
+      WisAdjust: wisAdjust
+      ConAdjust: conAdjust
+      Endurance: baseSpeed
+      Favored: favoredClass
+      FeatsTable: featsTable
+      Biography: defaultBio
+      PlayerRace: playerRace
+      Constant: constant
+      AGE: defaultAge
+      CRModifier: crModifier
+      IsHumanoid: isHumanoid
+      DefaultSubRace: defaultSubrace
+      female_race_icon: femaleIcon
+      male_race_icon: maleIcon
+      FEATFavoredEnemy: featFavoredEnemy
+      FEATImprovedFavoredEnemy: featImprovedFavoredEnemy
+      FEATFavoredPowerAttack: featFavoredPowerAttack
+      FEATIgnoreCritImmunity: featIgnoreCritImmunity
+
+  # Omitted schemas for:
+  # - ranges (meh)
+  # - repadjust (meh)
+  # - replacetexture (meh)
+  # - reputation (meh)
+  # - repute (meh)
+  # - resistancecost (wtf)
+  # - restduration (needs custom handling)
+  # - restsys_wm_tables (wtf)
+  # - rrf_* (unreadable)
+  # - screen_container_ui (meh)
+  # - skill_mounted (eh?)
+  
+  - typeName: skills
+    columns:
+      Label: label
+      Name: name
+      Description: description
+      Icon: icon
+      Untrained: requiresTraining
+      KeyAbility: keyAbility
+      ArmorCheckPenalty: hasArmorPenalty
+      AllClassesCanUse: allClassesCanUse
+      Category: category
+      MAXCR: maxCR
+      Constant: constant
+      HostileSkill: isHostile
+      CosmopolitanFeat: cosmopolitanFeat
+      IsAnActiveSkill: isActive
+      ToggleMode: toggleMode
+      PlayerOnly: playerOnly
+      REMOVED: removed
+
+  # Omitted schemas for:
+  # - skillvsitemcost (meh)
+  # - skyboxes (meh)
+  # - skyring (meh)
+
+  # Defined by xp_dae plugin
+  - typeName: sneakfeats
+    columns:
+      label: label
+      featid: featId
+      groupid: groupId
+      rank: rank
+      dice: dice
+  
+  # Defined by xp_dae plugin
+  - typeName: sneakgroups
+    columns:
+      label: label
+      class: class
+      prereqsonly: prereqsOnly
+      noflank: noFlank
+
+  # Omitted schemas for:
+  # - sound* (meh, mostly unreadable)
+  # - soundset (meh)
+  
+  - typeName: spells
+    # Noticed a HealingKit row which looks like padding,
+    # but why would a padding row have that name?
+    # Sorry, you'll have to wipe out some padding rows by yourselves!
+    criticalColumn: Label
+    columns: 
+      Label: label
+      Name: name
+      IconResRef: iconResRef
+      School: school
+      Range: range
+      VS: components
+      MetaMagic: metamagic
+      TargetType: targetType
+      ImpactScript: impactScript
+      Bard: bardCircle
+      Cleric: clericCircle
+      Druid: druidCircle
+      Paladin: paladinCircle
+      Ranger: rangerCircle
+      Wiz_Sorc: wizardCircle
+      Warlock: warlockCircle
+      Innate: innateCircle
+      ConjTime: conjTime
+      ConjAnim: conjAnim
+      ConjVisual0: conjVisual0
+      LowConjVisual0: lowConjVisual0
+      ConjVisual1: conjVisual1
+      ConjVisual2: conjVisual2
+      ConjSoundMale: conjSoundMale
+      ConjSoundFemale: conjSoundFemale
+      ConjSoundOverride: conjSoundOverride
+      CastAnim: castAnim
+      CastTime: castTime
+      CastVisual0: castVisual0
+      LowCastVisual0: lowCastVisual0
+      CastVisual1: castVisual1
+      CastVisual2: castVisual2
+      CastSound: castSound
+      Proj: isProjectile
+      ProjModel: projectileModel
+      ProjSEF: projectileSEF
+      LowProjSEF: lowProjectileSEF
+      ProjType: projectileType
+      ProjSpwnPoint: projectileSpawnPoint
+      ProjSound: projectileSound
+      ProjOrientation: projectileOrientation
+      ImpactSEF: impactSEF
+      LowImpactSEF: lowImpactSEF
+      ImmunityType: immunityType
+      ItemImmunity: itemImmunity
+      SubRadSpell1: subRadSpell1
+      SubRadSpell2: subRadSpell2
+      SubRadSpell3: subRadSpell3
+      SubRadSpell4: subRadSpell4
+      SubRadSpell5: subRadSpell5
+      Category: category
+      Master: master
+      UserType: userType
+      SpellDesc: description
+      UseConcentration: useConcentration
+      SpontaneouslyCast: spontaneouslyCast
+      SpontCastClassReq: spontCastClassReq
+      AltMessage: altMessage
+      HostileSetting: hostileSetting
+      FeatID: featId
+      Counter1: counter1
+      Counter2: counter2
+      HasProjectile: hasProjectile
+      AsMetaMagic: asMetaMagic
+      TargetingUI: targetingUI
+      CastableOnDead: castableOnDead
+      REMOVED: removed
+
+  # Omitted schemas for:
+  # - spellschools (meh)
+  # - spelltarget (meh)
+  # - statescripts (meh)
+  # - stringtokens (meh)
+  # - surfacemat (meh)
+  # - swearfilter (meh)
+  
+  - typeName: tailmodel
+    columns:
+      LABEL: label
+      StringRef: strRef
+      NWN2_ModelName: modelName
+      NWN2_Skeleton_File: skeletonFile
+      NWN2_BaseAnims: baseAnims
+      MODEL: model
+
+  # Omitted schemas for:
+  # - Eeeeeeverything starting with T (except traps)!
+
+  - typeName: traps
+    columns:
+      Label: label
+      TrapScript: trapScript
+      SetDC: setDC
+      DetectDCMod: detectDCMod
+      DisarmDCMod: disarmDCMod
+      TrapName: name
+      ResRef: resRef
+      IconResRef: iconResRef
+
+  # Omitted schemas for:
+  # - vfx_fire_forget (meh)
+
+  - typeName: vfx_persistent
+    criticalColumns:
+      - SHAPE
+      - VisualFX
+    columns:
+      LABEL: label
+      SHAPE: shape
+      RADIUS: radius
+      WIDTH: width
+      LENGTH: length
+      ONENTER: onEnter
+      ONEXIT: onExit
+      HEARTBEAT: heartbeat
+      OrientWithGround: orientWithGround
+      DropToGround: dropToGround
+      VisualFX: visualFX
+      SoundImpact: soundImpact
+      SoundDuration: soundDuration
+      SoundCessation: soundCessation
+      FillSEF: fillSEF
+      SEFSize: sefSize
+
+  # Omitted schemas for:
+  # - videoquality (meh)
+
+  - typeName: visualeffects
+    criticalColumn: Type_FD
+    columns:
+      Label: label
+      Type_FD: type
+      OrientWithGround: orientWithGround
+      DelayDurationFX: delayDurationFX
+      Imp_HeadCon_Node: impHeadConNode
+      Imp_Impact_Node: impImpactNode
+      Imp_Root_S_Node: impRootSNode
+      Imp_Root_M_Node: impRootMNode
+      Imp_Root_L_Node: impRootLNode
+      Imp_Root_H_Node: impRootHNode
+      ProgFX_Impact: progFXImpact
+      SoundImpact: soundImpact
+      Dur_HeadCon_Node: durHeadConNode
+      Dur_Impact_Node: durImpactNode
+      Dur_Root_S_Node: durRootSNode
+      Dur_Root_M_Node: durRootMNode
+      Dur_Root_L_Node: durRootLNode
+      Dur_Root_H_Node: durRootHNode
+      ProgFX_Duration: progFXDuration
+      SoundDuration: soundDuration
+      ProgFX_Cessation: progFXCessation
+      # Not a typo. >.<
+      SoundCessastion: soundCessation
+      Ces_HeadCon_Node: cesHeadConNode
+      Ces_Impact_Node: cesImpactNode
+      Ces_Root_S_Node: cesRootSNode
+      Ces_Root_M_Node: cesRootMNode
+      Ces_Root_L_Node: cesRootLNode
+      Ces_Root_H_Node: cesRootHNode
+      ShakeType: shakeType
+      ShakeDelay: shakeDelay
+      ShakeDuration: shakeDuration
+      LowViolence: lowViolenceVariant
+      LowQuality: lowQualityVariant
+
+  - typeName: weaponsounds
+    criticalColumn: Miss0
+    columns:
+      Label: label
+      Leather0: leather0
+      Leather1: leather1
+      Chain0: chain0
+      Chain1: chain1
+      Plate0: plate0
+      Plate1: plate1
+      Stone0: stone0
+      Stone1: stone1
+      Wood0: wood0
+      Wood1: wood1
+      Chitin0: chitin0
+      Chitin1: chitin1
+      Scale0: scale0
+      Scale1: scale1
+      Ethereal0: ethereal0
+      Ethereal1: ethereal1
+      Miss0: miss0
+      Miss1: miss1
+      Parry0: parry0
+      Critical0: critical0
+
+  - typeName: wingmodel
+    criticalColumns:
+      - StringRef
+      - MODEL
+    columns:
+      LABEL: label
+      StringRef: strRef
+      NWN2_ModelName: modelName
+      NWN2_Skeleton_File: skeletonFile
+      NWN2_BaseAnims: baseAnims
+      MODEL: model
+
+  # Omitted all remaining schemas V-X.
+
+

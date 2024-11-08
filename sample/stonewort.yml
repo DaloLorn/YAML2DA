@@ -1,0 +1,52 @@
+# NEVER EVER EDIT THIS FIELD: This tells YAML2DA this is a BGCraft herb.
+yamlType: bgcraft_herbs
+
+# Sequential list of files whose fields should be used as default values.
+# The final file will be generated as follows:
+# 1. Take all the fields defined in the first file specified in `inherits`.
+# n. Take all the fields defined in the nth file specified in `inherits`, and
+# use them to overwrite any existing values in those fields.
+# n+1. Take all the fields defined in this file, and use them to overwrite
+# any existing values in those fields.
+#
+# For instance, although we're inheriting from `ethereal_herb`,
+# which has an `ethereal` value of 1, we've defined `ethereal`
+# as `null` in this file, so the generated row will have a value of "****".
+inherits:
+  - ethereal_herb
+
+# Optional identifier used instead of the filename when:
+# - Resolving inheritance (e.g. this file would now be imported as `stwort` instead of `stonewort`)
+# NOTE: Filenames are fully lowercased when generating implicit identifiers.
+# The only way to use uppercase characters in a file's identifier is to
+# explicitly set this field.
+identifier: stwort
+
+# This is the 0-indexed ID of the row this file will be exported to.
+# Files without an `id` field will not be exported into the final 2DA.
+# Gaps between IDs will be filled with empty padding rows, to maintain
+# table integrity between exports.
+#
+# IMPORTANT: This ID must be unique across all files of this type! YAML2DA will
+# refuse to pack a project with redundant row IDs.
+id: 11
+
+# All of the below fields correspond exactly to a column in bgcraft_herbs.2da.
+label: Stonewort
+# Except this one: This one maps to the `Identifier` column to avoid conflict with YAML2DA.
+harvestGroup: stonewort
+skill: 29
+harvestDC: 9
+maxHarvests: 4
+xpReward: 9
+outputResRef: bg_it_herb_011
+ethereal: null # In this case, we could also have set it to 0 for the same effect... but null is safer.
+msgSuccess: "Survival: Success - Digging a small hole into the ground and around
+  the stonewort, you are able to protect the rhizomes and to collect a whole
+  plant."
+msgFailCheck: "Survival: Failure - Digging around the stonewort seems to further
+  damage the plant. You can't isolate a good plant with fresh and whole rhizomes
+  here."
+msgCooldown: The holes in the ground and the area seem quite disturbed after
+  recent harvest attempts. More time might be needed to inspect the area and the
+  plants.
