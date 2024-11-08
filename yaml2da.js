@@ -15,6 +15,9 @@ const options = getopt({
     schema: {
         key: "s", description: "Path to additional schema files to be loaded after defaultSchemas.yml. Exports also automatically load all files in the project folder with a yamlType of 'schema'. Note that 'defaultSchemas' is a reserved name and will not be loaded.", args: "*", default: []
     },
+    labelInvert: {
+        key: "l", description: "When importing single-file 2DAs, puts the row ID ahead of the row label (if the schema specified a 'labelField') when naming the imported YMLs, ensuring the filenames are ordered by row ID. Normally, the label goes first, so the files are ordered alphabetically by row label."
+    },
     _meta_: { args: 1 },
 })
 

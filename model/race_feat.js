@@ -2,6 +2,7 @@ import ClassFeatList from "./cls_feat.js";
 import build2DA from "../util/build_2da.js";
 import { flatMap } from "lodash-es";
 
+const typeName = "race_feat";
 const RaceFeatList = {
     validate: validate,
     pack: pack,
@@ -16,7 +17,6 @@ const columns = [
     "FeatLabel",
     "FeatIndex",
 ];
-const typeName = "race_feat";
 
 function postLoad(file, context) {
     const result = file;

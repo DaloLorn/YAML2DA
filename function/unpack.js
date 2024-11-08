@@ -1,4 +1,5 @@
 import path from "path";
+import sanitize from "sanitize-filename";
 import { exec } from "child_process";
 import { parse, stringify } from "yaml";
 import { writeFile, stat, readdir, readFile, mkdir } from "fs/promises";
@@ -8,7 +9,7 @@ import ModelTypes from "../util/modelTypes.js";
 import { promisify } from "util";
 
 export default async function unpackFrom2DA(options) {
-    const { outputFolder: customOutputFolder, filterType: filterTypes, schema, args } = options;
+    const { outputFolder: customOutputFolder, filterType: filterTypes, schema, args, labelInvert } = options;
     const project = args[0];
     const stats = await stat(project);
     let projectRoot;
@@ -62,8 +63,20 @@ export default async function unpackFrom2DA(options) {
                 if(!existsSync(outputSubfolder))
                     await mkdir(outputSubfolder)
                 const unpackedRows = handler.unpack(parsed2DA);
+                const hasLabelField = !!handler.labelField;
+                const idDigitCount = Math.log10(unpackedRows.length) + 1;
                 await unpackedRows.forEach(async row => {
-                    const outputFile = path.join(outputSubfolder, `${row.id}.yml`);
+                    let filename;
+                    const paddedId = String(row.id).padStart(idDigitCount, '0');
+                    if(hasLabelField) {
+                        if(labelInvert)
+                            filename = `${paddedId}_${row[handler.labelField]}.yml`;
+                        else
+                            filename = `${row[handler.labelField]}_${paddedId}.yml`;
+                    }
+                    else
+                        filename = `${paddedId}.yml`;
+                    const outputFile = path.join(outputSubfolder, sanitize(filename));
                     writeFile(outputFile, stringify(row));
                 })
                 console.log(`Unpacked ${unpackedRows.length} out of ${parsed2DA.rows.length} rows from ${path.basename(file)} (omitted rows were interpreted as padding)`)

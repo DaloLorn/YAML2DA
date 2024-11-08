@@ -22,7 +22,7 @@ function load(schema) {
         return;
 
     let loaded = false;
-    const { schemas, typeName } = schema;
+    const { schemas, typeName, labelField } = schema;
     if(typeName) {
         if(["load", "schema", "unknown"].includes(typeName))
             console.error(`Failed to load external schema: ${typeName} is a reserved keyword!`)
@@ -35,6 +35,7 @@ function load(schema) {
                 // Multi-file schemas cannot be procedurally defined yet!
                 hasMultipleFiles: false,
                 typeName,
+                labelField,
             }
             loaded = true;
         }

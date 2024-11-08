@@ -1,6 +1,7 @@
 import { pickBy } from "lodash-es";
 import build2DA from "../util/build_2da.js";
 
+const typeName = "cls_feat";
 const ClassFeatList = {
     validate: validate,
     pack: pack,
@@ -18,7 +19,6 @@ const columns = [
     "GrantedOnLevel",
     "OnMenu",
 ];
-const typeName = "cls_feat"
 
 function postLoad(file, context) {
     const result = file;

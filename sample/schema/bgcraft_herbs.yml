@@ -15,6 +15,14 @@ typeName: bgcraft_herbs
 # that row is interpreted as padding and will not generate a file.
 criticalColumn: Identifier
 
+# Optional field specifying a field to be included
+# in the filename of any YMLs imported from this 2DA.
+# If present, filenames will take the format `${row[labelField]}_${row.id}.yml`.
+# If absent, imported files will instead be called `${row.id}.yml`.
+# Note that some characters that might be legal in a 2DA
+# are not legal in a Windows filename, and will be omitted!
+labelField: label
+
 # Maps 2DA column labels to YAML2DA field names ("aliases").
 columns:
   # Can be either a simple `2DALabel: YAMLAlias` mapping...

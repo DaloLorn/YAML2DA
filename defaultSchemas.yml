@@ -51,6 +51,14 @@ schemas:
     # in a single schema.
     criticalColumn: SEFResRef
 
+    # Optional field specifying a field to be included
+    # in the filename of any YMLs imported from this 2DA.
+    # If present, filenames will take the format `${row[labelField]}_${row.id}.yml`.
+    # If absent, imported files will instead be called `${row.id}.yml`.
+    # Note that some characters that might be legal in a 2DA
+    # are not legal in a Windows filename, and will be omitted!
+    labelField: label
+
     # Maps 2DA column labels to YAML2DA field names ("aliases").
     columns:
       # Can be either a simple `2DALabel: YAMLAlias` mapping...
@@ -72,12 +80,14 @@ schemas:
   # Schema disabled for now.
   # - typeName: accessories_cat
   #   criticalColumn: type
+  #   labelField: type
   #   columns:
   #     type: type
 
   # Schema disabled for now.
   # - typeName: actions
   #   criticalColumn: STRING_REF
+  #   labelField: label
   #   columns:
   #     LABEL: label
   #     STRING_REF: strRef
@@ -88,6 +98,7 @@ schemas:
     criticalColumns:
       - Description # Row 0, "(No Music Track)", is *not* padding, so we need a second column!
       - Resource
+    labelField: label
     columns:
       Description: description
       Resource: resource
@@ -100,6 +111,7 @@ schemas:
     criticalColumns:
       - Description
       - Resource
+    labelField: displayName
     columns:
       Description: description
       Resource: resource
@@ -117,6 +129,7 @@ schemas:
     criticalColumns:
       - Model
       - ProjSEF
+    labelField: label
     columns:
       label: label
       Model: model
@@ -133,6 +146,7 @@ schemas:
       - NWN2_Model_Hair
       - NWN2_Head_Skeleton
       - NWN2_Skeleton_File
+    labelField: label
     columns:
       LABEL: label
       STRING_REF: strRef
@@ -197,6 +211,7 @@ schemas:
 
   - typeName: appearancesndset
     criticalColumn: Label
+    labelField: label
     columns:
       Label: label
       ArmorType: armorType
@@ -213,6 +228,7 @@ schemas:
 
   - typeName: areaeffects
     criticalColumn: SHAPE
+    labelField: label
     columns:
       LABEL: label
       ID: tableId # Why does this field even exist? I mean, really.
@@ -226,6 +242,7 @@ schemas:
 
   - typeName: armor
     criticalColumn: BASEITEMSTATREF
+    labelField: label
     columns:
       ACBONUS: acBonus
       DEXBONUS: dexBonus
@@ -243,6 +260,7 @@ schemas:
 
   - typeName: armorrulestats
     criticalColumn: BASEITEMSTATREF
+    labelField: label
     columns:
       Label: label
       ACBONUS: acBonus
@@ -265,6 +283,7 @@ schemas:
   #     Parent: parent
 
   - typeName: backgrounds
+    labelField: label
     columns:
       Label: label
       Name: name
@@ -296,6 +315,7 @@ schemas:
 
   - typeName: baseitems
     criticalColumn: Name
+    labelField: label
     columns:
       Name: name
       label: label
@@ -374,6 +394,7 @@ schemas:
   # Schema disabled for now.
   # - typeName: bodybag
   #   criticalColumn: Name
+  #   labelField: label
   #   columns:
   #     LABEL: label
   #     Name: name
@@ -381,6 +402,7 @@ schemas:
 
   # Schema disabled for now.
   # - typeName: capart
+  #   labelField: name
   #   columns:
   #     NAME: name
   #     MDLNAME: mdlName
@@ -389,11 +411,13 @@ schemas:
   # NOTE: This 2DA appears to be 1-indexed for some reason. Approach with caution.
   # Schema disabled for now.
   # - typeName: categories
+  #   labelField: category
   #   columns:
   #     Category: category
 
   # Schema disabled for now.
   # - typeName: catype
+  #   labelField: name
   #   columns:
   #     NAME: name
   #     TYPE: type
@@ -405,6 +429,7 @@ schemas:
 
   - typeName: classes
     criticalColumn: Name
+    labelField: label
     columns:
       Label: label
       Name: name
@@ -509,6 +534,7 @@ schemas:
 
   # Schema disabled for now.
   # - typeName: combatmodes
+  #   labelField: combatMode
   #   columns:
   #     CombatMode: combatMode
   #     ActivatedName: activatedName
@@ -517,6 +543,7 @@ schemas:
 
   # Schema disabled for now.
   # - typeName: container_preference
+  #   labelField: label
   #   columns:
   #     Label: label
   #     Name: name
@@ -529,6 +556,7 @@ schemas:
 
   # Schema disabled for now.
   # - typeName: creaturesize
+  #   labelField: label
   #   columns:
   #     LABEL: label
   #     ACATTACKMOD: acAttackMod
@@ -536,6 +564,7 @@ schemas:
 
   # Schema disabled for now.
   # - typeName: creaturespeed
+  #    labelField: label
   #   columns:
   #     Label: label
   #     Name: name
@@ -550,6 +579,7 @@ schemas:
 
   # Schema disabled for now.
   # - typeName: cursors
+  #   labelField: label
   #   columns:
   #     Label: label
   #     ResRef: resRef
@@ -557,6 +587,7 @@ schemas:
 
   # Schema disabled for now.
   # - typeName: damagehitvisual
+  #   labelField: label
   #   columns:
   #     Label: label
   #     VisualEffectID: visualEffectId
@@ -565,6 +596,7 @@ schemas:
   # NOTE: The game does not read this table from HAKs, only overrides.
   # Schema disabled for now.
   # - typeName: damagelevels
+  #   labelField: label
   #   columns:
   #     LABEL: label
   #     STRING_REF: strRef
@@ -574,12 +606,14 @@ schemas:
 
   # Schema disabled for now.
   # - typeName: damagereductins
+  #   labelField: label
   #   columns:
   #     LABEL: label
   #     NAME: name
 
   # Schema disabled for now.
   # - typeName: defaultacsounds
+  #   labelField: label
   #   columns:
   #     Label: label
   #     ArmorType: armorType
@@ -590,6 +624,7 @@ schemas:
 
   - typeName: disease
     criticalColumn: Name
+    labelField: label
     columns:
       Label: label
       Name: name
@@ -611,6 +646,7 @@ schemas:
 
   - typeName: domains
     criticalColumn: Name
+    labelField: label
     columns:
       Label: label
       Name: name
@@ -630,6 +666,7 @@ schemas:
 
   - typeName: doortypes
     criticalColumn: Label
+    labelField: label
     columns:
       Label: label
       PlaceableModelType: placeableModelType
@@ -654,6 +691,7 @@ schemas:
     criticalColumns:
       - Icon
       - StrRef
+    labelField: label
     columns:
       Label: label
       Icon: icon
@@ -671,6 +709,7 @@ schemas:
   
   - typeName: feat
     criticalColumn: FEAT
+    labelField: label
     columns:
       LABEL: label
       FEAT: name
@@ -746,6 +785,7 @@ schemas:
   # - gender (meh)
   
   - typeName: genericdoors
+    labelField: label
     columns:
       Label: label
       StrRef: strRef
@@ -759,6 +799,7 @@ schemas:
   # - grass (meh)
   
   - typeName: hen_companion
+    labelField: name
     columns:
       NAME: name
       BASERESREF_PREFIX: baseResRefPrefix
@@ -780,6 +821,7 @@ schemas:
       FeatID: featId
 
   - typeName: hen_familiar
+    labelField: name
     columns:
       NAME: name
       BASERESREF_PREFIX: baseResRefPrefix
@@ -805,6 +847,7 @@ schemas:
   
   - typeName: itempropdef
     criticalColumn: Label
+    labelField: label
     columns:
       Name: name
       Label: label
@@ -841,6 +884,7 @@ schemas:
   
   - typeName: nwn2_deities
     criticalColumn: FirstName
+    labelField: firstName
     columns:
       FirstName: firstName
       LastName: lastName
@@ -898,6 +942,7 @@ schemas:
   
   - typeName: packages
     criticalColumn: ClassID
+    labelField: label
     columns:
       Label: label
       Name: name
@@ -926,6 +971,7 @@ schemas:
   
   - typeName: placeableobjsnds
     criticalColumn: ArmorType
+    labelField: label
     columns:
       Label: label
       ArmorType: armorType
@@ -937,6 +983,7 @@ schemas:
 
   - typeName: placeables
     criticalColumn: NWN2_ModelName
+    labelField: label
     columns:
       Label: label
       StrRef: strRef
@@ -969,6 +1016,7 @@ schemas:
 
   - typeName: poison
     criticalColumn: Save_DC
+    labelField: label
     columns:
       Label: label
       Name: name
@@ -990,6 +1038,7 @@ schemas:
     criticalColumns:
       - AppearanceResRef
       - RacialType
+    labelField: name
     columns:
       Name: name
       AppearanceResRef: appearanceResRef
@@ -1023,6 +1072,7 @@ schemas:
 
   - typeName: racialsubtypes
     criticalColumn: BaseRace
+    labelField: label
     columns:
       Label: label
       BaseRace: baseRace
@@ -1059,6 +1109,7 @@ schemas:
 
   - typeName: racialtypes
     criticalColumn: Abrev
+    labelField: label
     columns:
       Label: label
       Abrev: abbreviation
@@ -1107,6 +1158,7 @@ schemas:
   # - skill_mounted (eh?)
   
   - typeName: skills
+    labelField: label
     columns:
       Label: label
       Name: name
@@ -1133,6 +1185,7 @@ schemas:
 
   # Defined by xp_dae plugin
   - typeName: sneakfeats
+    labelField: label
     columns:
       label: label
       featid: featId
@@ -1142,6 +1195,7 @@ schemas:
   
   # Defined by xp_dae plugin
   - typeName: sneakgroups
+    labelField: label
     columns:
       label: label
       class: class
@@ -1157,6 +1211,7 @@ schemas:
     # but why would a padding row have that name?
     # Sorry, you'll have to wipe out some padding rows by yourselves!
     criticalColumn: Label
+    labelField: label
     columns: 
       Label: label
       Name: name
@@ -1235,6 +1290,7 @@ schemas:
   # - swearfilter (meh)
   
   - typeName: tailmodel
+    labelField: label
     columns:
       LABEL: label
       StringRef: strRef
@@ -1247,6 +1303,7 @@ schemas:
   # - Eeeeeeverything starting with T (except traps)!
 
   - typeName: traps
+    labelField: label
     columns:
       Label: label
       TrapScript: trapScript
@@ -1264,6 +1321,7 @@ schemas:
     criticalColumns:
       - SHAPE
       - VisualFX
+    labelField: label
     columns:
       LABEL: label
       SHAPE: shape
@@ -1287,6 +1345,7 @@ schemas:
 
   - typeName: visualeffects
     criticalColumn: Type_FD
+    labelField: label
     columns:
       Label: label
       Type_FD: type
@@ -1325,6 +1384,7 @@ schemas:
 
   - typeName: weaponsounds
     criticalColumn: Miss0
+    labelField: label
     columns:
       Label: label
       Leather0: leather0
@@ -1352,6 +1412,7 @@ schemas:
     criticalColumns:
       - StringRef
       - MODEL
+    labelField: label
     columns:
       LABEL: label
       StringRef: strRef

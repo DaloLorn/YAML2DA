@@ -83,3 +83,14 @@
     - visualeffects
     - weaponsounds
     - wingmodel
+
+### 0.2.1
+
+- Added new schema option: `labelField`. If specified in a single-file schema, filenames will try to follow the pattern `${row[labelField]}_${row.id}.yml` instead of the default `${row.id}.yml`.
+    - Some characters that are legal in a 2DA cell may not be legal in a Windows filename! These will be stripped out, so filenames may not *fully* match the 2DA label in all cases.
+    - Unlike `criticalColumn` and `criticalColumns`, `labelField` refers to a YAML field instead of a 2DA column. Like those other fields, it is case-sensitive, so watch your spelling when writing schemas!
+    - If desired, the `--labelInvert` (`-l`) option can be used to invert the naming scheme to `${row.id}_${row[labelField]}.yml`. This may be more convenient for small 2DAs with a few (under 100 or so) rows.
+- Row IDs in filenames are now zero-padded for proper alphabetization.
+    - Don't worry: This is strictly a filesystem QoL change, and will not be reflected in the YAML data.
+- Updated all default schemas (and the `bgcraft_herbs` sample) with hopefully-appropriate values of `labelField`.
+- ... Also caught a syntax error in 0.2.0, because of *course* I did a stupidly minor thing to completely break the application in between testing and committing the silly thing. :joy:
