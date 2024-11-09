@@ -9,7 +9,7 @@ import ModelTypes from "../util/modelTypes.js";
 import { promisify } from "util";
 
 export default async function unpackFrom2DA(options) {
-    const { outputFolder: customOutputFolder, filterType: filterTypes, schema, args, labelInvert } = options;
+    const { outputFolder: customOutputFolder, filterType: filterTypes, schema, args, labelInvert, printNulls } = options;
     const project = args[0];
     const stats = await stat(project);
     let projectRoot;
@@ -43,7 +43,7 @@ export default async function unpackFrom2DA(options) {
     let imported = false;
     await Promise.all(projectFiles.map(async file => {
         const execPromise = promisify(exec);
-        const {stdout: output, stderr: error} = await execPromise(`nwn-2da -O yaml "${file}"`)
+        const {stdout: output, stderr: error} = await execPromise(`nwn-2da -O yaml "${file}"`, { maxBuffer: 1024*1024*10 })
         if(!error) {
             const parsed2DA = parse(output);
             const handler = find(ModelTypes, handler => handler.validate && handler.validate(parsed2DA) && (!filterTypes?.length || filterTypes.includes(handler.typeName)));
@@ -55,14 +55,14 @@ export default async function unpackFrom2DA(options) {
 
             if(handler.hasMultipleFiles) {
                 const outputFile = path.join(outputFolder, `${path.basename(file.toLowerCase(), ".2da")}.yml`)
-                await writeFile(outputFile, stringify(handler.unpack(parsed2DA)));
+                await writeFile(outputFile, stringify(handler.unpack(parsed2DA, printNulls)));
                 console.log(`Unpacked ${path.basename(file)}`);
             }
             else {
                 const outputSubfolder = path.join(outputFolder, path.basename(file.toLowerCase(), ".2da"));
                 if(!existsSync(outputSubfolder))
                     await mkdir(outputSubfolder)
-                const unpackedRows = handler.unpack(parsed2DA);
+                const unpackedRows = handler.unpack(parsed2DA, printNulls);
                 const hasLabelField = !!handler.labelField;
                 const idDigitCount = Math.log10(unpackedRows.length) + 1;
                 await unpackedRows.forEach(async row => {

@@ -456,7 +456,7 @@ schemas:
       HasSpontaneousSpells: hasSpontaneousSpells
       SpontaneousConversionTable: spontaneousConversionTable
       SpellSwapMinLvl: spellSwapMinLvl
-      SpellSwapLvlInternal: spellSwapLvlInternal
+      SpellSwapLvlInterval: spellSwapLvlInterval
       SpellSwapLvlDiff: spellSwapLvlDiff
       AllSpellsKnown: allSpellsKnown
       HasInfiniteSpells: hasInfiniteSpells
@@ -756,7 +756,7 @@ schemas:
       REQSKILL2: reqSkill2
       ReqSkillMaxRanks2: reqSkillMaxRanks2
       ReqSkillMinRanks2: reqSkillMinRanks2
-      CONSTANT: constant
+      Constant: constant
       TOOLSCATEGORIES: toolsCategory
       HostileFeat: hostileFeat
       MinLevel: minLevel

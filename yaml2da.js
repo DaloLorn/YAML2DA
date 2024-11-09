@@ -18,6 +18,9 @@ const options = getopt({
     labelInvert: {
         key: "l", description: "When importing single-file 2DAs, puts the row ID ahead of the row label (if the schema specified a 'labelField') when naming the imported YMLs, ensuring the filenames are ordered by row ID. Normally, the label goes first, so the files are ordered alphabetically by row label."
     },
+    printNulls: {
+        key: "p", description: "When importing 2DAs, null values will no longer be stripped out of the resulting YMLs."
+    },
     _meta_: { args: 1 },
 })
 

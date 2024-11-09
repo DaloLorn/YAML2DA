@@ -128,7 +128,7 @@ Unresolved dependencies: ${JSON.stringify(missingDependencies)}`);
                         const packedFile = handler.pack(file);
                         const outputPath = path.join(outputFolder, `${file.identifier}.2da`);
                         await writeFile(outputPath, stringify(packedFile));
-                        const nwn2da = exec(`nwn-2da -o "${outputPath}" -O 2da-mini -I yaml "${outputPath}"`);
+                        const nwn2da = exec(`nwn-2da -o "${outputPath}" -O 2da -I yaml "${outputPath}"`);
                         nwn2da.on("spawn", () => {
                             //console.log(nwn2da.spawnargs)
                         })
@@ -143,7 +143,7 @@ Unresolved dependencies: ${JSON.stringify(missingDependencies)}`);
                 const packedFile = handler.pack(type);
                 const outputPath = path.join(outputFolder, `${typeName}.2da`);
                 await writeFile(outputPath, stringify(packedFile));
-                const nwn2da = exec(`nwn-2da -o "${outputPath}" -O 2da-mini -I yaml "${outputPath}"`);
+                const nwn2da = exec(`nwn-2da -o "${outputPath}" -O 2da -I yaml "${outputPath}"`);
                 nwn2da.on("spawn", () => {
                     //console.log(nwn2da.spawnargs)
                 })

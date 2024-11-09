@@ -93,7 +93,7 @@ function unpack(list) {
 
     const feats = {};
     list.rows.forEach((row) => {
-        if(row[FeatIndex] == null)
+        if(row[FeatIndex] === null)
             return; // We really don't need to include padding...
         addYAMLEntry(Number(row[FeatIndex]), row[FeatLabel], feats);
     })

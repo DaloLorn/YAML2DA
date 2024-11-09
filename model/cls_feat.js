@@ -143,7 +143,7 @@ function unpack(list) {
 
     const levels = {};
     list.rows.forEach((row) => {
-        if(!row[FeatIndex] && Number(row[FeatIndex]) != 0)
+        if(!row[FeatIndex] === null)
             return; // We really don't need to include padding...
         let levelNumber = Number(row[GrantedOnLevel]);
         if(levelNumber < 2 || Number.isNaN(levelNumber)) // Prettify a bit!

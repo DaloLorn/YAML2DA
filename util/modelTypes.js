@@ -1,6 +1,6 @@
 import ClassFeatList from "../model/cls_feat.js"
 import RaceFeatList from "../model/race_feat.js"
-import { keys, every, forEach, values, omit, pickBy, negate, size, isNull, times, isEmpty } from "lodash-es";
+import { keys, every, forEach, values, omit, pickBy, negate, size, isNull, times, isEmpty, mapValues } from "lodash-es";
 import build2DA from "./build_2da.js";
 import { parse } from "yaml"
 import { readFile } from 'fs/promises'
@@ -116,7 +116,7 @@ function buildPacker(schema) {
 
 function buildUnpacker(schema) {
     const { typeName, columns, criticalColumns, criticalColumn } = schema;
-    return list => {
+    return (list, printNulls) => {
         // Get 2DA indices for the columns we need to read!
         // Also all the columns that must exist in a non-padding row!
         const criticalIndices = [];
@@ -133,15 +133,23 @@ function buildUnpacker(schema) {
             let result = {};
             values(columns).forEach((column, i) => result[getColumnAlias(column)] = row[columnIndices[i]])
 
-            result = pickBy(omit(result, 'yamlType'), negate(isNull))
+            result = omit(result, 'yamlType');
 
-            if(isEmpty(result))
+            const resultMinusNulls = pickBy(result, negate(isNull))
+
+            if(isEmpty(resultMinusNulls))
                 return; // Doing another quick padding check!
+            
+            if(!printNulls)
+                result = resultMinusNulls
 
             return {
                 yamlType: typeName,
                 id,
-                ...result,
+                ...mapValues(result, value => {
+                    const number = Number(value);
+                    return !Number.isNaN(number) && value !== null ? number : value;
+                }),
             }
         }).filter(row => !!row)
     }

@@ -94,3 +94,11 @@
     - Don't worry: This is strictly a filesystem QoL change, and will not be reflected in the YAML data.
 - Updated all default schemas (and the `bgcraft_herbs` sample) with hopefully-appropriate values of `labelField`.
 - ... Also caught a syntax error in 0.2.0, because of *course* I did a stupidly minor thing to completely break the application in between testing and committing the silly thing. :joy:
+
+### 0.2.2
+
+- Fixed broken schemas for classes.2da and feat.2da.
+- Vastly increased maximum buffer size for importing 2DAs, so the tool should no longer crash on trying to import large 2DAs.
+- Exporter now generates fully-formed instead of minified 2DAs, for better compatibility.
+- Added new command line option, `--printNulls` (`-p`). When set, YAML2DA will no longer ignore null cells when importing a 2DA, and will include them in the resulting YMLs. Does not do anything when exporting.
+- Importer now tries to coerce cell values to numbers, to stop unnecessarily quoting them.
