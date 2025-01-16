@@ -106,3 +106,7 @@
 ### 0.2.3
 
 - Fixed an oversight where the exporter never actually digested the custom schemas it loaded, preventing it from exporting 2DAs for those schemas. (Reproducible on the sample files with the following commands: `node yaml2da sample -f bgcraft_herbs` and `node yaml2da sample`, where the former throws an error and the latter just fails to pack `bgcraft_herbs.2da`.)
+
+### 0.2.4
+
+- Fixed another oversight where the exporter failed to apply inheritance rules for single-file schemas.

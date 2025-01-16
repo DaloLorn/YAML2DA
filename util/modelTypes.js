@@ -63,7 +63,7 @@ function buildLoader(schema) {
 
             result = {
                 // First we apply all the ancestor's data...
-                ...dependency,
+                ...context.files[typeName][dependency],
                 // Then we override it!
                 ...result,
             }
