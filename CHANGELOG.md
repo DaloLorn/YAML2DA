@@ -102,3 +102,7 @@
 - Exporter now generates fully-formed instead of minified 2DAs, for better compatibility.
 - Added new command line option, `--printNulls` (`-p`). When set, YAML2DA will no longer ignore null cells when importing a 2DA, and will include them in the resulting YMLs. Does not do anything when exporting.
 - Importer now tries to coerce cell values to numbers, to stop unnecessarily quoting them.
+
+### 0.2.3
+
+- Fixed an oversight where the exporter never actually digested the custom schemas it loaded, preventing it from exporting 2DAs for those schemas. (Reproducible on the sample files with the following commands: `node yaml2da sample -f bgcraft_herbs` and `node yaml2da sample`, where the former throws an error and the latter just fails to pack `bgcraft_herbs.2da`.)

@@ -66,6 +66,7 @@ export default async function packTo2DA(options) {
     );
 
     merge(schemaFiles, unloadedFiles.schema);
+    forEach(schemaFiles, ModelTypes.load);
     const otherFiles = omit(unloadedFiles, 'schema');
     if(!otherFiles) {
         console.error("No files were found for the requested filter(s). Please check your filters and make sure you're exporting the right folder!");
