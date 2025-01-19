@@ -1,7 +1,7 @@
 # NEVER EVER EDIT THIS FIELD: This tells YAML2DA this is a racial feat list.
 yamlType: race_feat
 
-# List of files whose `levels` fields should be merged into this one
+# List of files whose `feats` fields should be merged into this one
 # before exporting this file into a 2DA.
 imports:
   - universal_feats

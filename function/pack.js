@@ -19,7 +19,7 @@ export default async function packTo2DA(options) {
     }
     else if(stats.isFile() && project.toLowerCase().endsWith(".yml")) {
         projectRoot = path.dirname(path.resolve(project))
-        const targetFile = parse(await readFile(project), 'utf-8');
+        const targetFile = parse(await readFile(project, 'utf-8'));
         filterTypes = [targetFile.yamlType];
         if(!filterTypes) {
             throw new TypeError("The specified file is not a YAML2DA file!")

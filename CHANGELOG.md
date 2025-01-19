@@ -110,3 +110,21 @@
 ### 0.2.4
 
 - Fixed another oversight where the exporter failed to apply inheritance rules for single-file schemas.
+
+## 0.3.0
+
+- **Added support for custom tree schemas (in the vein of cls_feat and race_feat)**. Tree schemas use the new `columns[colName].path` and `yamlMap` schema fields, and cannot function without both of these.
+    - Examples and end-user documentation for this, as well as all other additions in this update, can be reviewed under the cls_feat schema in `defaultSchemas.yml`.
+    - By their very nature, tree schemas are multi-file schemas (i.e. each YML exports to a separate 2DA, instead of being mashed together into a single 2DA).
+- Replaced the hardcoded cls_feat and race_feat importers with default tree schemas.
+- Added support for custom value mappers (like how GrantedOnLevel 1 maps to "always" when importing cls_feat, and vice versa) via the `columns[colName].mapping` and `yamlMap.tree[colAlias].mapping` schema fields.
+    - This also supports retrieving the mapped value from a metadata field (e.g. mapping "epic" to the value of `epicFrom`) on export, with an optional default value if the field doesn't exist.
+- Added support for clamping imported values to a certain range via the `columns[colName].minimum` and `columns[colName].maximum` schema fields. Clamping is only applied to numerical values; other cells are imported verbatim.
+    - Numerical clamping applies before mapping. For instance, GrantedOnLevel -1 would clamp to 1, which then maps to "always".
+    - Exported numbers aren't being clamped at this time. Really, the only reason I added this feature in the first place was because it was part of the old cls_feat importer.
+- The `columns[colName].alias` field is no longer required, and can be automatically inferred from `colName`.
+- Fixed an issue where single-file export would throw a TypeError because I wasn't supplying the file encoding to `readFile`. (Parentheses in the wrong places. It happens.)
+- Fixed an issue where the cls_feat importer would mistakenly map all feats to List 0 (`unlocks`).
+- Fixed a QoL issue where the `generateOutput` metadata field (if applicable) would be printed at the very bottom of an imported file. It now prints at the top, devoting the rest of the file exclusively to converted 2DA data.
+- Fixed some poorly copy-pasted documentation in race_feat_aasim.yml.
+- Refactored a few chunks of `modelTypes.js`.

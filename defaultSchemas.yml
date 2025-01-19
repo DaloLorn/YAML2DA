@@ -1,5 +1,4 @@
-# This file contains default schemas for 2DA types where
-# each row is a self-contained object (e.g. a class, a feat).
+# This file contains all of YAML2DA's default schemas.
 # These schemas can be overridden by redefining them
 # in your project folder.
 #
@@ -8,13 +7,6 @@
 #
 # Schemas not provided by your custom schema file(s) will instead
 # use the defaults provided by this file.
-#
-# Some 2DA types are structured such that each 2DA
-# is an object unto itself (e.g. cls_feat_*, race_feat_*).
-# For the time being, these require special handling
-# and will have their handlers defined wholly in JavaScript
-# in the `model` folder.
-# These handlers are then imported at the top of `util/modelTypes.js`.
 
 # This field is technically not needed for `defaultSchemas`, 
 # but never mind! It specifies that the file is a schema or schema list.
@@ -517,11 +509,122 @@ schemas:
       CharGen_Cloak: charGenCloak
       CharGen_Head: charGenHead
 
+  # Some 2DA types are structured such that each 2DA is an object 
+  # unto itself (e.g. cls_feat_*, race_feat_*). The definitions for
+  # these schemas are different in several subtle and not-so-subtle ways.
+  # Most of these are documented as they become relevant below, but a few key differences:
+  # - The labelField property is ignored.
+  # - The yamlMap property is mandatory. If it does not exist, the schema is interpreted
+  #   as a single-file schema.
+  - typeName: cls_feat
+    criticalColumn: FeatIndex
+    columns:
+      FeatLabel: FeatLabel
+      FeatIndex:
+        # Specifies a path to which this value will be saved. Note that columns without a path
+        # will not be explicitly mapped to YAML (e.g. OnMenu is omitted from the file,
+        # while GrantedOnLevel, List, and FeatLabel exist only as implicit ancestors to FeatIndex).
+        #
+        # Paths are defined using JavaScript dot notation. JavaScript bracket notation
+        # is used only to access 2DA columns.
+        #
+        # WARNING: While there is probably no reason you should want to use the "alias" field
+        # in a multi-file schema in the first place, be aware that YAML2DA will use
+        # those aliases while interpreting the "path" field! For instance,
+        # if GrantedOnLevel had an alias of "levelGranted", we would need to use the path
+        # "levels.[levelGranted].[List].[FeatLabel]" here, instead!
+        path: levels.[GrantedOnLevel].[List].[FeatLabel]
+      List:
+        mapping:
+          # These feats can be taken as a feat choice once unlocked.
+          0: unlocks
+          # These feats can be taken as a feat or bonus feat choice once unlocked.
+          1: unlocksBonus
+          # These feats can be taken ONLY as a bonus feat choice once unlocked.
+          # (Unless they were fully unlocked by another class, or can be taken by all classes anyway.)
+          2: bonusPicks
+          # These feats are automatically granted on levelup.
+          3: grants
+      GrantedOnLevel:
+        # Specifies a minimum for numerical values. Leave blank if not applicable,
+        # YAML2DA will default it to Number.MIN_VALUE.
+        minimum: 1
+        # Specifies a maximum for numerical values. Leave blank if not applicable,
+        # YAML2DA will default to Number.MAX_VALUE.
+        maximum: 30
+        # Remaps certain values to other values (after min/max clamping, if any).
+        # For instance, anything granted on level 1 (or lower, because of our minimum)
+        # will be rendered to YAML as being granted by the "always" level.
+        # CAUTION: Make sure to define an inverse mapping in yamlMap,
+        # or your schema may export faulty 2DAs!
+        mapping:
+          # Feats unlocked from level 1 or less are always unlocked.
+          1: always
+          # Feats unlocked from level 21 are epic unlocks.
+          21: epic
+      OnMenu:
+        optional: true
+    yamlMap:
+      # Specifies values for columns with constant values. These values are used
+      # by all rows in the 2DA, for whatever silly reason.
+      # TODO: Add support for some kind of conditional logic here, e.g.
+      # specifying that if List == 2, then OnMenu = 1 or something;
+      # or that if epicFrom == 11, then OnMenu = 2. Silly, unrealistic
+      # examples, but they get the point across...
+      consts:
+        OnMenu: 0
+      tree:
+        # NOTE: Must start with a constant root node, and end with a leaf node (or array of leaf nodes).
+        # In this case, the "levels" node always exists in a valid cls_feat file,
+        # and the leaves of its YAML tree, all mapping to FeatIndex, are four layers down.
+        # YAML2DA uses these two data points to deduce that it needs to go down the tree
+        # three times in order to build a list of paths to all values of FeatIndex.
+        #
+        # The resulting paths will look something like "levels.always.grants.WeapProfSimple".
+        # You may notice this maps neatly back to the "path" property we defined for FeatIndex.
+        # This is no coincidence: The purpose of that property was to map the 2DA row
+        # onto a YAML path in the first place, and by deconstructing that path,
+        # we can now infer the values of FeatLabel, List, and GrantedOnLevel.
+        # (We already know that the data stored *at* that path is supposed
+        # to be one or more FeatIndex values associated with those inferred values!)
+        - levels
+          # We need an object here, because we have to apply some transformations
+          # to the values we're getting from this layer. But at the same time,
+          # we also need to know the name of the column those values belong to!
+        - column: GrantedOnLevel
+          # Remap YAML values to 2DA values. Should basically be the reverse
+          # of the "mapping" property we defined earlier.
+          mapping:
+            always: 1
+            epic:
+              # Unlike "always", "epic" derives its value from a scalar
+              # property in the YAML (referenced using JavaScript dot notation).
+              # This is because epic levels may not always start at 21 for a given class.
+              #
+              # For example, BGTSCC had intended to add epic
+              # progression to PRCs starting at 11: their PRC
+              # feat tables would thus have needed to be written 
+              # with the assumption that epic levels start at 11.
+              src: epicFrom
+              # Default value in case "src" refers to a property that
+              # does not exist in the YAML or is not a scalar.
+              # If blank, will use null (i.e. "****") instead.
+              default: 21
+        - column: List
+          mapping:
+            unlocks: 0
+            unlocksBonus: 1
+            bonusPicks: 2
+            grants: 3
+          # Notice how having no "mapping" property means we can store a string
+          # instead of an object here...
+        - FeatLabel
+        - FeatIndex
+
   # Omitting schemas for:
   # - cls_atk
   # - cls_bfeat
   # - cls_bsplvl
-  # - cls_feat (already implemented)
   # - cls_featmap
   # - cls_pres
   # - cls_savthr
@@ -531,6 +634,7 @@ schemas:
   # - cls_spon
   # - color
   # These cannot be meaningfully described in the current YAML schema format.
+  # (TODO: Review for possible tree use cases.)
 
   # Schema disabled for now.
   # - typeName: combatmodes
@@ -553,6 +657,7 @@ schemas:
   # - crafting_index
   # These cannot be meaningfully described in the current format, and may in fact
   # need to be unified into a single YAML to cover both 2DAs.
+  # (TODO: Review for possible tree use cases.)
 
   # Schema disabled for now.
   # - typeName: creaturesize
@@ -576,6 +681,7 @@ schemas:
   # - crft_alch_* (no idea what the hell they even are)
   # - crtemplates (why bother)
   # - DMFI languages (needs custom handling)
+  # (TODO: Review for possible tree use cases.)
 
   # Schema disabled for now.
   # - typeName: cursors
@@ -621,6 +727,7 @@ schemas:
   # Omitting schemas for:
   # - des_* (no idea what the hell that is, but I don't think it's vanilla!)
   # - diffsettings (needs custom handling)
+  # (TODO: Review for possible tree use cases.)
 
   - typeName: disease
     criticalColumn: Name
@@ -686,6 +793,7 @@ schemas:
 
   # Omitting schemas for:
   # - effectanim (no idea what it does)
+  # (TODO: Review for possible tree use cases.)
 
   - typeName: effecticons
     criticalColumns:
@@ -706,6 +814,7 @@ schemas:
   # - eventtoolredirect (not sure what it's for)
   # - excitedduration (ditto)
   # - exptable (requires custom handler)
+  # (TODO: Review for possible tree use cases.)
   
   - typeName: feat
     criticalColumn: FEAT
@@ -783,6 +892,7 @@ schemas:
   # - Game_Params (wtf)
   # - gamespyrooms (meh)
   # - gender (meh)
+  # (TODO: Review for possible tree use cases.)
   
   - typeName: genericdoors
     labelField: label
@@ -797,6 +907,7 @@ schemas:
 
   # Omitting schemas for:
   # - grass (meh)
+  # (TODO: Review for possible tree use cases.)
   
   - typeName: hen_companion
     labelField: name
@@ -844,6 +955,7 @@ schemas:
   # - henchspells (wtf)
   # - inventorysnds (meh)
   # - iprp_* (mostly meh, and/or needs custom handling)
+  # (TODO: Review for possible tree use cases.)
   
   - typeName: itempropdef
     criticalColumn: Label
@@ -881,6 +993,7 @@ schemas:
   # - NWN2_BehaviorParams (meh)
   # - NWN2_BloodTypes (meh)
   # - NWN2_Colors (meh)
+  # (TODO: Review for possible tree use cases.)
   
   - typeName: nwn2_deities
     criticalColumn: FirstName
@@ -939,6 +1052,7 @@ schemas:
   # - nwn2_tips (meh)
   # - NWN2_VoiceMenu (meh)
   # - nwnx_craft (uhhhh...?)
+  # (TODO: Review for possible tree use cases.)
   
   - typeName: packages
     criticalColumn: ClassID
@@ -968,6 +1082,7 @@ schemas:
   # - packsp* (meh)
   # - parts_* (unreadable)
   # - phenotype (meh)
+  # (TODO: Review for possible tree use cases.)
   
   - typeName: placeableobjsnds
     criticalColumn: ArmorType
@@ -1013,6 +1128,7 @@ schemas:
 
   # Omitted schemas for:
   # - placeabletypes (meh)
+  # (TODO: Review for possible tree use cases.)
 
   - typeName: poison
     criticalColumn: Save_DC
@@ -1068,7 +1184,19 @@ schemas:
   # - pregen (meh)
   # - prioritygroups (meh)
   # - pvpsettings (meh)
-  # - race_feat_* (has custom handler)
+  # (TODO: Review for possible tree use cases.)
+
+  - typeName: race_feat
+    criticalColumn: FeatIndex
+    columns:
+      FeatLabel: FeatLabel
+      FeatIndex:
+        path: feats.[FeatLabel]
+    yamlMap:
+      tree:
+        - feats
+        - FeatLabel
+        - FeatIndex
 
   - typeName: racialsubtypes
     criticalColumn: BaseRace
@@ -1156,6 +1284,7 @@ schemas:
   # - rrf_* (unreadable)
   # - screen_container_ui (meh)
   # - skill_mounted (eh?)
+  # (TODO: Review for possible tree use cases.)
   
   - typeName: skills
     labelField: label
@@ -1182,6 +1311,7 @@ schemas:
   # - skillvsitemcost (meh)
   # - skyboxes (meh)
   # - skyring (meh)
+  # (TODO: Review for possible tree use cases.)
 
   # Defined by xp_dae plugin
   - typeName: sneakfeats
@@ -1205,6 +1335,7 @@ schemas:
   # Omitted schemas for:
   # - sound* (meh, mostly unreadable)
   # - soundset (meh)
+  # (TODO: Review for possible tree use cases.)
   
   - typeName: spells
     # Noticed a HealingKit row which looks like padding,
@@ -1288,6 +1419,7 @@ schemas:
   # - stringtokens (meh)
   # - surfacemat (meh)
   # - swearfilter (meh)
+  # (TODO: Review for possible tree use cases.)
   
   - typeName: tailmodel
     labelField: label
@@ -1301,6 +1433,7 @@ schemas:
 
   # Omitted schemas for:
   # - Eeeeeeverything starting with T (except traps)!
+  # (TODO: Review for possible tree use cases.)
 
   - typeName: traps
     labelField: label
@@ -1316,6 +1449,7 @@ schemas:
 
   # Omitted schemas for:
   # - vfx_fire_forget (meh)
+  # (TODO: Review for possible tree use cases.)
 
   - typeName: vfx_persistent
     criticalColumns:
@@ -1342,6 +1476,7 @@ schemas:
 
   # Omitted schemas for:
   # - videoquality (meh)
+  # (TODO: Review for possible tree use cases.)
 
   - typeName: visualeffects
     criticalColumn: Type_FD
@@ -1422,5 +1557,6 @@ schemas:
       MODEL: model
 
   # Omitted all remaining schemas V-X.
+  # (TODO: Review for possible tree use cases.)
 
 
