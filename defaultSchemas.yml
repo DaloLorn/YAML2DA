@@ -52,6 +52,15 @@ schemas:
     labelField: label
 
     # Maps 2DA column labels to YAML2DA field names ("aliases").
+    # Note that the following keywords are reserved by YAML2DA,
+    # and cannot be used as aliases:
+    # - yamlType
+    # - generateOutput
+    # - imports
+    # - inherits
+    # - id
+    # - identifier
+    # - variants
     columns:
       # Can be either a simple `2DALabel: YAMLAlias` mapping...
       label: label
@@ -67,6 +76,7 @@ schemas:
         optional: true
 
         # The alias to use for this column in YAML2DA files.
+        # If omitted, will default to the 2DA label.
         alias: useStrRef
 
   # Schema disabled for now.

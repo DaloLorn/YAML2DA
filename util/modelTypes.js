@@ -1,4 +1,4 @@
-import { keys, every, forEach, values, pickBy, negate, size, isNull, times, isEmpty, defaults, mergeWith, get, isObject, entries, set, setWith, has, last, isArray, split } from "lodash-es";
+import { keys, every, forEach, values, pickBy, negate, size, isNull, times, isEmpty, defaults, mergeWith, get, isObject, entries, set, setWith, has, last, isArray, split, isObjectLike } from "lodash-es";
 import build2DA from "./build_2da.js";
 import { parse } from "yaml"
 import { readFile } from 'fs/promises'
@@ -8,7 +8,7 @@ const ModelTypes = {
 };
 
 const reservedSchemas = ["load", "schema", "unknown"];
-const reservedAliases = ["yamlType", "generateOutput", "imports", "inherits", "id", "identifier"];
+const reservedAliases = ["yamlType", "generateOutput", "imports", "inherits", "id", "identifier", "variants"];
 
 // Load defaultSchemas.yml before we continue!
 (parse(await readFile(new URL(import.meta.resolve("../defaultSchemas.yml")), "utf-8"))).schemas.map(load);
@@ -133,7 +133,7 @@ function buildValidator(schema) {
     }
 }
 
-function getColumnAlias(key, column) {
+function getColumnAlias([key, column]) {
     if(typeof column === "string")
         return column;
     else return column?.alias || key;
@@ -144,28 +144,40 @@ function buildPacker(schema) {
 
     if(!yamlMap) return files => {
         const rows = [];
-        forEach(files, file => {
-            if(!Number.isInteger(Number(file.id)))
+        const aliasedColumns = entries(columns).map(getColumnAlias);
+        let rowCount = 0;
+        function packVariant(source, parent = times(size(columns), () => null)) {
+            if(!isObjectLike(source))
                 return;
-            file.id = Math.floor(file.id)
-            if(rows[file.id])
-                throw new ReferenceError(`Attempted to write to ${typeName} row ID ${file.id} twice! Each row ID must occur only once in the project!`)
+            if(Number.isInteger(Number(source.id))) {
+                if(rows[source.id])
+                    throw new ReferenceError(`Attempted to write to ${typeName} row ID ${source.id} twice! Each row ID must occur only once in the project!`);
 
-            rows[file.id] = [];
-            forEach(entries(columns), ([key, column]) => rows[file.id].push(file[getColumnAlias(key, column)] ?? null));
-        })
+                rowCount++;
+                rows[source.id] = aliasedColumns.map((alias, index) => source[alias] ?? parent[index]);
+            }
+            forEach(source.variants, variant => packVariant(variant, rows[source.id]));
+        }
+
+        forEach(files, file => packVariant(file));
 
         let paddedRows = [];
         for(let i = 0; i < rows.length; i++) {
             paddedRows[i] = rows[i] || times(size(columns), () => null);
         }
-        return build2DA(
-            keys(columns),
-            paddedRows
-        )
+        return {
+            packedFile: build2DA(
+                keys(columns),
+                paddedRows,
+            ),
+            rowCount,
+            paddingCount: rows.length - rowCount,
+            lastId: rows.length - 1,
+        };
     }
     else return file => {
         const { tree, consts } = yamlMap;
+        const aliasedColumns = entries(columns).map(getColumnAlias);
         // Make a map of the keys of each layer of the tree. 
         // We don't actually need to remember each layer, I guess, but
         // screw it, better safe than sorry: It already took me
@@ -256,13 +268,16 @@ function buildPacker(schema) {
         // what we do when building for a single-file schema!
         // (TODO: Find better terminology to replace "single/multi-file".)
         const rows = flattenedTree.map((row) => {
-            return entries(columns).map(([key, column]) => row[getColumnAlias(key, column)] ?? null);
+            return aliasedColumns.map((alias) => row[alias] ?? null);
         })
 
-        return build2DA(
-            keys(columns),
-            rows,
-        );
+        return { 
+            packedFile: build2DA(
+                keys(columns),
+                rows,
+            ),
+            rowCount: rows.length,
+        };
     }    
 }
 

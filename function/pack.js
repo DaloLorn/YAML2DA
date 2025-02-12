@@ -3,7 +3,7 @@ import { exec } from "child_process";
 import { parse, stringify } from "yaml";
 import { readFile, writeFile, stat, readdir, mkdir } from 'fs/promises';
 import { existsSync } from "fs";
-import { forEach, groupBy, has, omit, filter, merge } from "lodash-es";
+import { forEach, groupBy, has, omit, merge } from "lodash-es";
 import ModelTypes from "../util/modelTypes.js";
 
 export default async function packTo2DA(options) {
@@ -126,7 +126,7 @@ Unresolved dependencies: ${JSON.stringify(missingDependencies)}`);
             if(handler.hasMultipleFiles) {
                 forEach(type, async file => {
                     if(file.generateOutput || file.identifier === projectIdentifier) {
-                        const packedFile = handler.pack(file);
+                        const { packedFile, rowCount } = handler.pack(file);
                         const outputPath = path.join(outputFolder, `${file.identifier}.2da`);
                         await writeFile(outputPath, stringify(packedFile));
                         const nwn2da = exec(`nwn-2da -o "${outputPath}" -O 2da -I yaml "${outputPath}"`);
@@ -135,13 +135,13 @@ Unresolved dependencies: ${JSON.stringify(missingDependencies)}`);
                         })
                         nwn2da.on("close", (code) => {
                             if(!code)
-                                console.log(`Wrote ${file.identifier}.2da`)
+                                console.log(`Wrote ${rowCount} entries to ${file.identifier}.2da`)
                         })
                     }
                 })
             }
             else {
-                const packedFile = handler.pack(type);
+                const { packedFile, rowCount, paddingCount, lastId } = handler.pack(type);
                 const outputPath = path.join(outputFolder, `${typeName}.2da`);
                 await writeFile(outputPath, stringify(packedFile));
                 const nwn2da = exec(`nwn-2da -o "${outputPath}" -O 2da -I yaml "${outputPath}"`);
@@ -150,9 +150,7 @@ Unresolved dependencies: ${JSON.stringify(missingDependencies)}`);
                 })
                 nwn2da.on("close", (code) => {
                     if(!code) {
-                        const rowCount = filter(type, file => file.id !== undefined).length;
-                        const paddingCount = packedFile.rows.length - rowCount;
-                        console.log(`Wrote ${rowCount} entries and ${paddingCount} blank rows to ${typeName}.2da, finishing on ID ${packedFile.rows.length-1}`)
+                        console.log(`Wrote ${rowCount} entries and ${paddingCount} blank rows to ${typeName}.2da, finishing on ID ${lastId}`)
                     }
                 })
             }

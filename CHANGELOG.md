@@ -134,3 +134,12 @@
 - Fixed an issue where single-file exports were flooding the file with null values.
 - Fixed a typo in an error message.
 - Some minor refactoring.
+
+## 0.4.0
+
+- Added `variants` YAML field for single-file schemas. This allows multiple similar 2DA rows to be populated from a single file. (It doesn't do anything fundamentally different from regular inheritance, but can be organizationally useful to group variants of a base entity together.)
+    - Variants can have their own `variants` field containing subvariants (with their own subsubvariants, and so on...).
+    - A variant with neither a 2DA ID nor subvariants will be silently ignored.
+    - A file does not need to have a root-level ID to register variants.
+    - Variants do not have identifiers (and can therefore not be inherited from by another file).
+    - Variants cannot use the `inherits` field (and are therefore incapable of inheriting from another file).

@@ -50,3 +50,20 @@ msgFailCheck: "Survival: Failure - Digging around the stonewort seems to further
 msgCooldown: The holes in the ground and the area seem quite disturbed after
   recent harvest attempts. More time might be needed to inspect the area and the
   plants.
+
+# These variants are nonsense, but they adequately demonstrate
+# the variant system. ID 13 will contain a duplicate of Stonewort with the 
+# label `Mywort`, and ID 9 will contain a duplicate of Mywort with the harvest 
+# group `exwort`.
+#
+# A few reminders in case you haven't read the 0.4.0 changelog:
+# - Variants do not have identifiers, so they can't be inherited from by
+#   other files.
+# - Variants cannot use the `inherits` field, so the can't inherit data from
+#   other files.
+variants:
+  - id: 13
+    label: Mywort
+    variants:
+      - id: 9
+        harvestGroup: exwort
