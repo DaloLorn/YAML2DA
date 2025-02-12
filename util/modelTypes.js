@@ -1,4 +1,4 @@
-import { keys, every, forEach, values, omit, pickBy, negate, size, isNull, times, isEmpty, defaults, mergeWith, get, isObject, entries, set, setWith, has, last, isArray, split } from "lodash-es";
+import { keys, every, forEach, values, pickBy, negate, size, isNull, times, isEmpty, defaults, mergeWith, get, isObject, entries, set, setWith, has, last, isArray, split } from "lodash-es";
 import build2DA from "./build_2da.js";
 import { parse } from "yaml"
 import { readFile } from 'fs/promises'
@@ -133,10 +133,10 @@ function buildValidator(schema) {
     }
 }
 
-function getColumnAlias(column) {
+function getColumnAlias(key, column) {
     if(typeof column === "string")
         return column;
-    else return column?.alias;
+    else return column?.alias || key;
 }
 
 function buildPacker(schema) {
@@ -152,7 +152,7 @@ function buildPacker(schema) {
                 throw new ReferenceError(`Attempted to write to ${typeName} row ID ${file.id} twice! Each row ID must occur only once in the project!`)
 
             rows[file.id] = [];
-            forEach(entries(columns), ({key, column}) => rows[file.id].push(file[getColumnAlias(column) || key] ?? null));
+            forEach(entries(columns), ([key, column]) => rows[file.id].push(file[getColumnAlias(key, column)] ?? null));
         })
 
         let paddedRows = [];
@@ -242,7 +242,7 @@ function buildPacker(schema) {
                 leafNode = [leafNode];
             return leafNode.map((value) => {
                 if(isObject(value))
-                    throw new TypeError(`Found an invalid path in '${file.identifier}': shema '${typeName}' expects leaf nodes at depth ${pathComponents.length}, but '${path}' contains neither a scalar nor an array of scalars!`);
+                    throw new TypeError(`Found an invalid path in '${file.identifier}': schema '${typeName}' expects leaf nodes at depth ${pathComponents.length}, but '${path}' contains neither a scalar nor an array of scalars!`);
                 const result = { ...rowStub };
                 last(mappers)(result, value);
                 return result;
@@ -256,7 +256,7 @@ function buildPacker(schema) {
         // what we do when building for a single-file schema!
         // (TODO: Find better terminology to replace "single/multi-file".)
         const rows = flattenedTree.map((row) => {
-            return entries(columns).map(([key, column]) => row[getColumnAlias(column) || key] ?? null);
+            return entries(columns).map(([key, column]) => row[getColumnAlias(key, column)] ?? null);
         })
 
         return build2DA(

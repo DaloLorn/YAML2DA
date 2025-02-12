@@ -128,3 +128,9 @@
 - Fixed a QoL issue where the `generateOutput` metadata field (if applicable) would be printed at the very bottom of an imported file. It now prints at the top, devoting the rest of the file exclusively to converted 2DA data.
 - Fixed some poorly copy-pasted documentation in race_feat_aasim.yml.
 - Refactored a few chunks of `modelTypes.js`.
+
+### 0.3.1
+
+- Fixed an issue where single-file exports were flooding the file with null values.
+- Fixed a typo in an error message.
+- Some minor refactoring.
