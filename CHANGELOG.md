@@ -143,3 +143,24 @@
     - A file does not need to have a root-level ID to register variants.
     - Variants do not have identifiers (and can therefore not be inherited from by another file).
     - Variants cannot use the `inherits` field (and are therefore incapable of inheriting from another file).
+
+## 0.5.0
+
+- Trying to use the `--filterType` and `--schema` options without any arguments now shows an error message and exits.
+- The `--schema` option now supports recursively loading schemas from a folder, as opposed to having to explicitly specify the path to each individual schema file.
+- Added `--merge` (`-m`) option.
+    - Supersedes `--import`.
+    - Will exit with an error if the input path is a folder.
+    - Takes a nonzero amount of additional file/folder paths.
+    - Ignores the following options:
+        - `--filterType`: Will simply read the `yamlType` of the input file and use that as a filter, instead.
+        - `--printNulls`: Is an import-only option.
+        - `--labelInvert`: Is an import-only option.
+        - `--outputFolder`: Outputs everything into the input file.
+    - Will merge all of the specified files into the input file as variants.
+    - Only works for single-file schemas, and will refuse to work without a schema for the target file.
+        - Use the `--unsafe` (`-u`) option to ignore missing schemas.
+- Renamed build_2da.js to build2da.js for consistency with the other camel-cased files.
+- More refactoring! Always!
+- Rewrote readme to better showcase the tool's current features.
+- Rewrote package description to better describe the tool's purpose.

@@ -1,10 +1,10 @@
 import path from "path";
 import { exec } from "child_process";
 import { parse, stringify } from "yaml";
-import { readFile, writeFile, stat, readdir, mkdir } from 'fs/promises';
-import { existsSync } from "fs";
+import { readFile, writeFile, stat, mkdir } from 'fs/promises';
 import { forEach, groupBy, has, omit, merge } from "lodash-es";
 import ModelTypes from "../util/modelTypes.js";
+import readFiles from "../util/readFiles.js";
 
 export default async function packTo2DA(options) {
     const { outputFolder: customOutputFolder, filterType, schema, args } = options;
@@ -22,34 +22,38 @@ export default async function packTo2DA(options) {
         const targetFile = parse(await readFile(project, 'utf-8'));
         filterTypes = [targetFile.yamlType];
         if(!filterTypes) {
-            throw new TypeError("The specified file is not a YAML2DA file!")
+            console.error("The specified file is not a YAML2DA file!");
+            return;
         }
         projectIdentifier = targetFile.identifier || path.basename(project).toLowerCase().replace(".yml", "");
     }
     else {
-        throw new TypeError("The specified path is neither a YAML file nor a folder!")
+        console.error("The specified path is neither a YAML file nor a folder!");
+        return;
     }
 
-    const projectFiles = await Promise.all((await readdir(projectRoot, {
-        withFileTypes: true,
-        recursive: true,
-    }))
-        .filter(file => file.isFile() && file.name.toLowerCase().endsWith(".yml"))
-        .map(async file => {
-            const result = {
-                filename: file.name.toLowerCase(),
-                contents: parse(await readFile(path.join(file.path, file.name), 'utf-8'))
-            }
-            return result
-        }))
-        .then(files => files.filter(file => !filterTypes?.length || [...filterTypes, 'schema'].includes(file.contents.yamlType)));
-    const schemaFiles = await Promise.all(schema.map(async file => {
-        const loadedFile = parse(await readFile(file, 'utf-8'));
-        return {
-            ...loadedFile,
-            identifier: loadedFile.identifier || file,
-        }
-    }))
+    
+    const projectFiles = await readFiles(projectRoot, {
+        extension: '.yml',
+        loader: async (filePath, filename) => {
+            return {
+                filename: filename.toLowerCase(),
+                contents: parse(await readFile(filePath, 'utf-8'))
+            };
+        },
+        postFilter: file => !filterTypes?.length || [...filterTypes, 'schema'].includes(file.contents.yamlType),
+    })
+    const schemaFiles = await readFiles(schema, {
+        extension: '.yml',
+        loader: async (filePath, filename) => {
+            const loadedFile = parse(await readFile(filePath, 'utf-8'));
+            return {
+                ...loadedFile,
+                identifier: loadedFile.identifier || filename,
+            };
+        },
+        postFilter: file => file.yamlType === 'schema' && file.identifier !== 'defaultSchemas',
+    })
 
     const unloadedFiles = omit(
         groupBy(
@@ -66,6 +70,7 @@ export default async function packTo2DA(options) {
     );
 
     merge(schemaFiles, unloadedFiles.schema);
+    console.log(schemaFiles)
     forEach(schemaFiles, ModelTypes.load);
     const otherFiles = omit(unloadedFiles, 'schema');
     if(!otherFiles) {
@@ -74,8 +79,7 @@ export default async function packTo2DA(options) {
     }
 
     const outputFolder = customOutputFolder || path.join(projectRoot, 'packed');
-    if(!existsSync(outputFolder))
-        await mkdir(outputFolder)
+    await mkdir(outputFolder, { recursive: true });
 
     const context = {
         files: {},
@@ -105,7 +109,7 @@ export default async function packTo2DA(options) {
             files = files.filter(file => !loadedFiles.find(entry => entry.identifier == file.identifier));
         }
 
-        if(files.length != 0) {
+        if(files.length) {
             const missingDependencies = files
                 .flatMap(list => list[includeType].filter(dependency => has(context.files[typeName], dependency)))
                 .reduce((results, dependency) => {
@@ -113,9 +117,10 @@ export default async function packTo2DA(options) {
                         results.push(dependency)
                     return results;
                 }, []);
-            throw new ReferenceError(`One or more dependencies of type ${typeName} were not found in the project! Either they do not exist, or there is a circular dependency somewhere!
+            console.error(`One or more dependencies of type ${typeName} were not found in the project! Either they do not exist, or there is a circular dependency somewhere!
                 
 Unresolved dependencies: ${JSON.stringify(missingDependencies)}`);
+            return;
         }
 
         forEach(context.files, async (type, typeName) => {

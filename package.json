@@ -1,7 +1,7 @@
 {
   "name": "yaml2da",
-  "version": "0.2.4",
-  "description": "Autogenerates a 2DA file from a specification written in YAML. Currently only supports the cls_feat_*.2da and race_feat_*.2da families, as well as a variety of simpler 2DAs.",
+  "version": "0.5.0",
+  "description": "A set of tools allowing easier modification and versioning of 2DA files, using a YAML-based data model to store and transform the 2DA's contents in a variety of ways not natively supported by the 2DA format.",
   "main": "yaml2da.js",
   "author": "DaloLorn",
   "license": "MIT",

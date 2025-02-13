@@ -1,5 +1,5 @@
 import { keys, every, forEach, values, pickBy, negate, size, isNull, times, isEmpty, defaults, mergeWith, get, isObject, entries, set, setWith, has, last, isArray, split, isObjectLike } from "lodash-es";
-import build2DA from "./build_2da.js";
+import build2DA from "./build2da.js";
 import { parse } from "yaml"
 import { readFile } from 'fs/promises'
 
@@ -15,10 +15,6 @@ const reservedAliases = ["yamlType", "generateOutput", "imports", "inherits", "i
 export default ModelTypes;
 
 function load(schema) {
-    // If the user accidentally triggers a reload of defaultSchemas.yml, overrule them!
-    if(schema.identifier === "defaultSchemas")
-        return;
-
     let loaded = false;
     const { schemas, typeName, labelField, yamlMap } = schema;
     if(typeName) {

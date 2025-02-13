@@ -1,12 +1,14 @@
-import path from "path";
+import { resolve as resolvePath, join as joinPath, basename, dirname } from "path";
 import sanitize from "sanitize-filename";
 import { exec } from "child_process";
 import { parse, stringify } from "yaml";
-import { writeFile, stat, readdir, readFile, mkdir } from "fs/promises";
-import { existsSync } from "fs";
+import { writeFile, stat, readFile, mkdir } from "fs/promises";
 import { find, forEach } from "lodash-es";
 import ModelTypes from "../util/modelTypes.js";
 import { promisify } from "util";
+import readFiles from "../util/readFiles.js";
+
+const execPromise = promisify(exec);
 
 export default async function unpackFrom2DA(options) {
     const { outputFolder: customOutputFolder, filterType: filterTypes, schema, args, labelInvert, printNulls } = options;
@@ -15,34 +17,40 @@ export default async function unpackFrom2DA(options) {
     let projectRoot;
     let projectFiles;
     if(stats.isDirectory()) {
-        projectRoot = path.resolve(project)
-        projectFiles = (await readdir(path.resolve(project), {withFileTypes: true}))
-            .filter(file => file.isFile() && file.name.toLowerCase().endsWith(".2da"))
-            .map(file => path.join(file.path, file.name));
+        projectRoot = resolvePath(project);
+        projectFiles = await readFiles([projectRoot], {
+            extension: '.2da',
+            loader: file => file,
+            recursive: false,
+        })
     }
     else if(stats.isFile()){
-        projectRoot = path.dirname(path.resolve(project))
-        projectFiles = [path.resolve(project)]
+        const projectFile = resolvePath(project);
+        projectRoot = dirname(projectFile);
+        projectFiles = [projectFile];
     }
     else {
-        throw new TypeError("The specified path is neither a 2DA file nor a folder!");
+        console.error("The specified path is neither a 2DA file nor a folder!");
+        return;
     }
-    const outputFolder = customOutputFolder || path.join(projectRoot, "unpacked");
-    if(!existsSync(outputFolder))
-        await mkdir(outputFolder)
+    const outputFolder = customOutputFolder || joinPath(projectRoot, "unpacked");
+    await mkdir(outputFolder, { recursive: true });
 
-    const schemaFiles = await Promise.all(schema.map(async file => {
-        const loadedFile = parse(await readFile(file, 'utf-8'));
-        return {
-            ...loadedFile,
-            identifier: loadedFile.identifier || file,
-        }
-    }))
+    const schemaFiles = await readFiles(schema, {
+        extension: '.yml',
+        loader: async (filePath, filename) => {
+            const loadedFile = parse(await readFile(filePath, 'utf-8'));
+            return {
+                ...loadedFile,
+                identifier: loadedFile.identifier || filename,
+            };
+        },
+        postFilter: file => file.yamlType === 'schema' && file.identifier !== 'defaultSchemas',
+    })
     forEach(schemaFiles, ModelTypes.load)
 
     let imported = false;
     await Promise.all(projectFiles.map(async file => {
-        const execPromise = promisify(exec);
         const {stdout: output, stderr: error} = await execPromise(`nwn-2da -O yaml "${file}"`, { maxBuffer: 1024*1024*10 })
         if(!error) {
             const parsed2DA = parse(output);
@@ -54,14 +62,13 @@ export default async function unpackFrom2DA(options) {
             imported = true; 
 
             if(handler.hasMultipleFiles) {
-                const outputFile = path.join(outputFolder, `${path.basename(file.toLowerCase(), ".2da")}.yml`)
+                const outputFile = joinPath(outputFolder, `${basename(file.toLowerCase(), ".2da")}.yml`)
                 await writeFile(outputFile, stringify(handler.unpack(parsed2DA, printNulls)));
-                console.log(`Unpacked ${path.basename(file)}`);
+                console.log(`Unpacked ${basename(file)}`);
             }
             else {
-                const outputSubfolder = path.join(outputFolder, path.basename(file.toLowerCase(), ".2da"));
-                if(!existsSync(outputSubfolder))
-                    await mkdir(outputSubfolder)
+                const outputSubfolder = joinPath(outputFolder, basename(file.toLowerCase(), ".2da"));
+                await mkdir(outputSubfolder, { recursive: true });
                 const unpackedRows = handler.unpack(parsed2DA, printNulls);
                 const hasLabelField = !!handler.labelField;
                 const idDigitCount = Math.log10(unpackedRows.length) + 1;
@@ -76,10 +83,10 @@ export default async function unpackFrom2DA(options) {
                     }
                     else
                         filename = `${paddedId}.yml`;
-                    const outputFile = path.join(outputSubfolder, sanitize(filename));
+                    const outputFile = joinPath(outputSubfolder, sanitize(filename));
                     writeFile(outputFile, stringify(row));
                 })
-                console.log(`Unpacked ${unpackedRows.length} out of ${parsed2DA.rows.length} rows from ${path.basename(file)} (omitted rows were interpreted as padding)`)
+                console.log(`Unpacked ${unpackedRows.length} out of ${parsed2DA.rows.length} rows from ${basename(file)} (omitted rows were interpreted as padding)`)
             }
         }
         else console.error(error)
