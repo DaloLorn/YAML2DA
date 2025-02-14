@@ -102,6 +102,8 @@ See the `sample` folder for sample files.
 - `schema/bgcraft_herbs.yml` is an annotated sample of a single-schema file.
 - `includes/ethereal_herb.yml` is a quick-and-dirty example of an include for the custom schema defined in `schema/bgcraft_herbs.yml`.
 - `stonewort.yml` is an annotated sample of the custom schema defined in `schema/bgcraft_herbs.yml`.
+- `cls_skill_battlerager.yml` is a *lightly* annotated sample of the `cls_skill` type.
+- `color_calishite.yml` is likewise a lightly annotated sample of the `color` type.
 - While it's located outside the `sample` folder, the `defaultSchemas.yml` file also serves as an annotated sample of a multi-schema file.
 
 </details>

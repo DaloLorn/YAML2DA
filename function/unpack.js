@@ -51,7 +51,7 @@ export default async function unpackFrom2DA(options) {
 
     let imported = false;
     await Promise.all(projectFiles.map(async file => {
-        const {stdout: output, stderr: error} = await execPromise(`nwn-2da -O yaml "${file}"`, { maxBuffer: 1024*1024*10 })
+        const {stdout: output, stderr: error} = await execPromise(`nwn-2da -O json "${file}"`, { maxBuffer: 1024*1024*10 })
         if(!error) {
             const parsed2DA = parse(output);
             const handler = find(ModelTypes, handler => handler.validate && handler.validate(parsed2DA) && (!filterTypes?.length || filterTypes.includes(handler.typeName)));

@@ -1,0 +1,120 @@
+yamlType: color
+generateOutput: true
+colors:
+  - hair: 4A362A
+    highlight: 4A362A
+    accessory: 7F5D54
+    skin: 8C522F
+    # Unless explicitly quoted, any string that can be interpreted as a number
+    # will be interpreted as a number unless quoted. This is important here for two reasons:
+    #
+    # 1. The use of the hexadecimal digit "E" may be misinterpreted as
+    #    signifying scientific notation (e.g. 8e8074 being8 * 10^8074).
+    # 2. Leading zeroes will be stripped out.
+    #
+    # Both of these scenarios may break the six-digit hex codes used
+    # by color files, so be careful, and quote your hex codes if you're not sure!
+    eye: "8E8074"
+    facialHair: 4A362A
+  - hair: 442C1F
+    highlight: 442C1F
+    accessory: "550000"
+    skin: 7C492A
+    eye: "898078"
+    facialHair: 442C1F
+  - hair: 3D2314
+    highlight: 3D2314
+    accessory: B27989
+    skin: 6D4024
+    eye: 85807C
+    facialHair: 3D2314
+  - hair: 3D2314
+    highlight: 3D2314
+    accessory: "654051"
+    skin: 8c5d3a
+    eye: 7B5A3D
+    facialHair: 3D2314
+  - hair: "372012"
+    highlight: "372012"
+    accessory: "503051"
+    skin: 784f31
+    eye: 694D34
+    facialHair: "372012"
+  - hair: 311C10
+    highlight: 311C10
+    accessory: 7C7DB0
+    skin: 9B5B34
+    eye: 58402C
+    facialHair: 311C10
+  - hair: 2B190E
+    highlight: 2B190E
+    accessory: 1D272D
+    skin: 8C522F
+    eye: "463323"
+    facialHair: 2B190E
+  - hair: 25150C
+    highlight: 25150C
+    accessory: FFFFFF
+    skin: 7C492A
+    eye: 35261A
+    facialHair: 25150C
+  - hair: 645F5D
+    highlight: 645F5D
+    accessory: 2F736E
+    skin: 6D4024
+    eye: 231A11
+    facialHair: 645F5D
+  - hair: 483E3A
+    highlight: 483E3A
+    accessory: 74A485
+    skin: 855d45
+    eye: "463323"
+    facialHair: 483E3A
+  - hair: 3F332E
+    highlight: 3F332E
+    accessory: 3B4935
+    skin: 7a5740
+    eye: 35261A
+    facialHair: 3F332E
+  - hair: "362822"
+    highlight: "362822"
+    accessory: 555B43
+    skin: 6e4f3b
+    eye: 231A11
+    facialHair: "362822"
+  - hair: "120905"
+    highlight: "120905"
+    accessory: 25311B
+    skin: "594437"
+    eye: 120D09
+    facialHair: "120905"
+  - hair: 331c12
+    highlight: 331c12
+    accessory: EFBF00
+    skin: 875b44
+    eye: 5e481e
+    facialHair: 331c12
+  - hair: 29170f
+    highlight: 29170f
+    accessory: ED5401
+    skin: 7a533d
+    eye: 542a0e
+    facialHair: 29170f
+  - hair: 1f110b
+    highlight: 1f110b
+    accessory: EB0100
+    skin: 6e4a35
+    eye: 63390f
+    facialHair: 1f110b
+  - hair: 120a06
+    highlight: 120a06
+    accessory: 1353D6
+    skin: 5e3f2d
+    eye: "603101"
+    facialHair: 120a06
+  - hair: "080403"
+    highlight: "080403"
+    accessory: 14B308
+    skin: 4f3524
+    eye: "451800"
+    facialHair: "080403"

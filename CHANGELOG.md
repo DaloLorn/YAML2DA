@@ -164,3 +164,23 @@
 - More refactoring! Always!
 - Rewrote readme to better showcase the tool's current features.
 - Rewrote package description to better describe the tool's purpose.
+
+## 0.6.0
+
+- Leaf nodes in a tree schema can now be defined as containing tuples instead of scalars, using the new `yamlMap.tree[leafIndex].tuple` property.
+    - Only the leaf layer can contain tuples. Defining a schema with non-leaf tuples will throw an error.
+    - 2DA columns with a `path` ending in a hardcoded path component (not ending in `]`) will now import into an array of tuples instead of generating unexportable files.
+    - Individual properties of a tuple can be mapped using the `mapping` field. See the `cls_featmap` schema for an example.
+- Leaf nodes in a tree schema can now be defined as strictly single-value (i.e. no arrays allowed) using the new `yamlMap.tree[leafIndex].singleValue` property.
+    - Unlike the `tuple` property, `singleValue` is legal for non-leaf layers, but will not do anything.
+- Added new column property, `columns[colName].string`. If set, YAML2DA will stop trying to import its contents as a number. (This is useful for representing things like hex codes, where it could result in accidental data corruption.)
+- Added default schemas for the following 2DA types:
+    - cls_featmap_* (NOTE: I have not tested what happens if class IDs are sparse or otherwise non-sequential inside a featmap! Do not delete values corresponding to non-caster classes without further testing... and do let me know if you've tested it!)
+    - cls_skill_* (It's safe to delete all cross-class skills, by the way!)
+    - cls_pres_*
+    - color_*
+    - csl_lang (DMFI language dictionaries, at least as used on BGTSCC)
+    - diffsettings
+    - encdifficulty
+- Changed import intermediary format to JSON for safer imports from 2DA.
+- Added sample files for `cls_skill` and `color` types. Lightly annotated, just covering a couple of key details I thought needed pointing out.

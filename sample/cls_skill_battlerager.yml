@@ -1,0 +1,18 @@
+yamlType: cls_skill
+generateOutput: true
+skills:
+  # Fun fact: You don't actually need to have a crossClass section!
+  # The game defaults to the assumption that any skill not listed in
+  # a class skill table is a cross-class skill.
+  crossClass:
+    CraftWeapon: 26
+  class:
+    Intimidate: 24
+    Listen: 6
+    Lore5: 36
+    Survival: 29
+    Tumble: 21
+    Perform: 11
+    Lore2: 33
+    Ride: 28
+    Athletics: 54

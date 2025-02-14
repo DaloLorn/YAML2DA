@@ -1,6 +1,6 @@
-import { keys, every, forEach, values, pickBy, negate, size, isNull, times, isEmpty, defaults, mergeWith, get, isObject, entries, set, setWith, has, last, isArray, split, isObjectLike } from "lodash-es";
+import { keys, every, forEach, values, pickBy, negate, size, isNull, times, isEmpty, defaults, mergeWith, get, isObject, entries, set, setWith, has, last, isArray, split, isObjectLike, findIndex } from "lodash-es";
 import build2DA from "./build2da.js";
-import { parse } from "yaml"
+import { parse, stringify } from "yaml"
 import { readFile } from 'fs/promises'
 
 const ModelTypes = {
@@ -186,6 +186,8 @@ function buildPacker(schema) {
 
             Alternative:
             layer 0 = [ feats.someFeat, feats.otherFeat... ]
+
+            layer 0 = [ classes.0, classes.2... ]
         */
         const treeDepth = tree.length;
         const layers = [keys(file[tree[0]]).map(key => `${tree[0]}.${key}`)];
@@ -204,29 +206,63 @@ function buildPacker(schema) {
         // the next step...
         const mappers = [];
         tree.forEach((layer, index) => {
+            // Always assume a non-data root layer. Things get messy
+            // otherwise, with YAML2DA metadata possibly being misflagged
+            // as a 2DA component!
             if(index == 0)
                 return;
 
+            // Straightforward, just fetch the column name from the schema
+            // and map the layer's keys onto that column.
             if(!isObject(layer)) {
                 mappers[index] = (rowStub, value) => {
                     rowStub[layer] = value;
                 }
             } else {
-                mappers[index] = (rowStub, value) => {
-                    const { mapping, column } = layer;
-                    if(has(mapping, value)) {
-                        const rule = mapping[value];
+                const { mapping, column, tuple } = layer;
+                // Remaps a value to another value based on
+                // the mapping rules for that value (if any).
+                function applyMapping(rules, value) {                    
+                    if(has(rules, value)) {
+                        const rule = rules[value];
                         if(!isObject(rule)) {
                             value = rule;
                         }
                         else {
-                            const src = file[rule.src]
+                            const src = get(file, rule.src)
                             if(src) 
                                 value = src;
                             else value = rule.default ?? null;
                         }
                     }
-                    rowStub[column] = value;
+                    return value;
+                }
+
+                // A leaf node might be a tuple instead of a scalar.
+                // If so, we need to extract its contents.
+                if(tuple) {
+                    if(index != treeDepth-1)
+                        throw new SyntaxError(`Complex schema "${typeName}" was defined with a non-leaf tuple! Tuples are only permitted for the last entry of "yamlMap.tree"!`);
+                    const tupleParts = entries(tuple);
+
+                    mappers[index] = (rowStub, value) => {
+                        // Run through each key in the tuple definition,
+                        // and map its contents just like we did the
+                        // rest of the tree.
+                        tupleParts.forEach(([part, definition]) => {
+                            if(!isObject(definition)) {
+                                rowStub[definition] = value[part];
+                            } else {
+                                rowStub[definition.column] = applyMapping(definition.mapping, value[part]);
+                            }
+                        })
+                    }
+                }
+                // Not a tuple, just needs some value mappings...
+                else {
+                    mappers[index] = (rowStub, value) => {
+                        rowStub[column] = applyMapping(mapping, value);
+                    }
                 }
             }
         })
@@ -243,14 +279,14 @@ function buildPacker(schema) {
             });
 
             // It's possible that there's multiple leaves on this
-            // branch of the tree (i.e. it's an array instead of a scalar).
-            // So let's pretend it's always an array, for simpliity!
+            // branch of the tree (i.e. it's an array instead of a single scalar/tuple).
+            // So let's pretend it's always an array, for simplicity!
             let leafNode = get(file, path);
-            if(!isObject(leafNode))
+            if(!isArray(leafNode))
                 leafNode = [leafNode];
+            else if(last(layers).singleValue)
+                throw new TypeError(`Found an invalid path in '${file.identifier}': schema '${typeName}' expects single-leaf branches, but '${path}' contains an array of leaf nodes:\n\n${stringify(leafNode)}`);
             return leafNode.map((value) => {
-                if(isObject(value))
-                    throw new TypeError(`Found an invalid path in '${file.identifier}': schema '${typeName}' expects leaf nodes at depth ${pathComponents.length}, but '${path}' contains neither a scalar nor an array of scalars!`);
                 const result = { ...rowStub };
                 last(mappers)(result, value);
                 return result;
@@ -316,7 +352,8 @@ function buildUnpacker(schema) {
             values(columns).forEach((column, i) => {
                 const value = row[columnIndices[i]];
                 const number = Number(value);
-                const isNumber = value !== null && !Number.isNaN(number);
+                // Try to coerce to a number unless explicitly instructed otherwise!
+                const isNumber = !column.string && value !== null && !Number.isNaN(number);
                 let mapped = isNumber ? number : value;
 
                 if(!isObject(column)) {
@@ -358,19 +395,20 @@ function buildUnpacker(schema) {
                 yamlType: typeName,
                 generateOutput: true,
             };
-            // Precache setters for all fields that map to scalars in the
+            // Precache setters for all fields that map to leaves in the
             // finished YAML.
             const mappers = [];
             values(columns).forEach((column) => {
                 // A scalar column definition automatically means
-                // that that column will not map to a scalar in the final YAML!
+                // that that column will not map to a leaf in the final YAML!
                 if(!isObject(column))
                     return;
-                const { path: pathSpec } = column;
+                const { path: pathSpec, alias } = column;
 
                 // This column doesn't map to a scalar. Ignore it.
                 if(!pathSpec)
                     return;
+                const isTuplePart = !pathSpec.endsWith("]"); 
 
                 mappers.push((row) => {
                     // Parse pathSpec into the actual path this cell maps to.
@@ -378,20 +416,42 @@ function buildUnpacker(schema) {
                         return `${row[ref]}`;
                     });
 
-                    // If we've already got a value at this path,
-                    // mash the values together into an array.
-                    // Otherwise, assign it as a scalar for user convenience.
-                    const currentValue = get(result, path);
-                    if(currentValue != null) {
-                        if(isObject(currentValue))
-                            currentValue.push(row[column.alias])
-                        else set(result, path, [currentValue, row[column.alias]]);
-                        
+                    // Tuples need special handling on import, too...
+                    if(isTuplePart) {
+                        const parentPath = path.substring(0, path.lastIndexOf("."))
+                        const childPath = path.substring(path.lastIndexOf(".")+1);
+                        const parent = get(result, parentPath);
+                        // If we've already started building leaf nodes,
+                        // then we just need to keep building...
+                        if(parent != null) {
+                            // Find the index of the first tuple we haven't populated 
+                            // this field for yet - if any exists, else append a new
+                            // tuple to the array.
+                            let index = findIndex(parent, (tuple) => !has(tuple, childPath));
+                            if(index < 0)
+                                index = parent.length;
+                            
+                            set(parent, `[${index}].${childPath}`, row[alias]);
+                        } else {
+                            const tuple = { [childPath]: row[alias] };
+                            // If any step in the path is a number, and its parent
+                            // doesn't exist yet, Lodash.set() will instantiate an array.
+                            // This is unacceptable behavior here, so let's stop it.
+                            setWith(result, parentPath, [tuple], Object);
+                        }
                     } else {
-                        // If any step in the path is a number, and its parent
-                        // doesn't exist yet, Lodash.set() will instantiate an array.
-                        // This is unacceptable behavior here, so let's stop it.
-                        setWith(result, path, row[column.alias], Object);
+                        // If we've already got a value at this path,
+                        // mash the values together into an array.
+                        // Otherwise, assign it as a scalar for user convenience.
+                        const currentValue = get(result, path);
+                        if(currentValue != null) {
+                            if(isObject(currentValue))
+                                currentValue.push(row[alias])
+                            else set(result, path, [currentValue, row[alias]]);
+                            
+                        } else {
+                            setWith(result, path, row[alias], Object);
+                        }
                     }
                 });
             });

@@ -631,20 +631,120 @@ schemas:
         - FeatLabel
         - FeatIndex
 
+  - typeName: cls_featmap
+    criticalColumn: SpellcasterFeat
+    columns:
+      ClassId: ClassId
+      ClassName: 
+        path: classes.[ClassId].name
+      SpellcasterFeat:
+        path: classes.[ClassId].casterFeat
+        mapping:
+          -1: N/A
+    yamlMap:
+      tree:
+        - classes
+        - ClassId
+        - # Tells YAML2DA that there should only be one leaf node.
+          # Does nothing if defined for a non-leaf layer.
+          singleValue: true
+          # The "tuple" property, permissible only in the final (i.e. leaf) layer
+          # of the tree definition, signifies that the layer contains
+          # groups of values corresponding to a given 2DA row.
+          tuple:
+            # Maps the "name" property of each tuple
+            # to the ClassName column.
+            name: ClassName
+            # Maps the "casterFeat" property of each tuple
+            # to the SpellcasterFeat column. Simple!
+            casterFeat:
+              column: SpellcasterFeat
+              mapping:
+                N/A: -1
+            
+  - typeName: cls_skill
+    criticalColumn: SkillIndex
+    columns:
+      SkillLabel: SkillLabel
+      SkillIndex:
+        path: skills.[ClassSkill].[SkillLabel]
+      ClassSkill:
+        mapping:
+        # Fun fact: Cross-class skills don't actually need
+        # to be specified in a cls_skill table!
+          0: crossClass 
+          1: class
+    yamlMap:
+      tree:
+        - skills
+        - column: ClassSkill
+          mapping:
+            crossClass: 0
+            class: 1
+        - SkillLabel
+        - singleValue: true
+          column: SkillIndex
+
+  - typeName: cls_pres
+    criticalColumn: ReqType
+    columns:
+      LABEL: LABEL
+      ReqType: ReqType
+      ReqParam1:
+        path: reqs.[ReqType].[LABEL].param1
+      ReqParam2:
+        path: reqs.[ReqType].[LABEL].param2
+    yamlMap:
+      tree:
+        - reqs
+        - ReqType
+        - LABEL
+        - tuple:
+            param1: ReqParam1
+            param2: ReqParam2
+
+  - typeName: color
+    columns:
+      hair_1:
+        path: colors.hair
+        string: true
+      hair_2: 
+        path: colors.highlight
+        string: true
+      hair_acc:
+        path: colors.accessory
+        string: true
+      skin: 
+        path: colors.skin
+        string: true
+      eyes: 
+        path: colors.eye
+        string: true
+      body_hair: 
+        path: colors.facialHair
+        string: true
+    yamlMap:
+      tree:
+        - colors
+        - id
+        - tuple:
+            hair: hair_1
+            highlight: hair_2
+            accessory: hair_acc
+            skin: skin
+            eye: eyes
+            facialHair: body_hair
+
+
   # Omitting schemas for:
   # - cls_atk
   # - cls_bfeat
   # - cls_bsplvl
-  # - cls_featmap
-  # - cls_pres
   # - cls_savthr
-  # - cls_skill
   # - cls_spgn
   # - cls_spkn 
   # - cls_spon
-  # - color
   # These cannot be meaningfully described in the current YAML schema format.
-  # (TODO: Review for possible tree use cases.)
 
   # Schema disabled for now.
   # - typeName: combatmodes
@@ -667,7 +767,6 @@ schemas:
   # - crafting_index
   # These cannot be meaningfully described in the current format, and may in fact
   # need to be unified into a single YAML to cover both 2DAs.
-  # (TODO: Review for possible tree use cases.)
 
   # Schema disabled for now.
   # - typeName: creaturesize
@@ -690,8 +789,18 @@ schemas:
   # Omitting schemas for:
   # - crft_alch_* (no idea what the hell they even are)
   # - crtemplates (why bother)
-  # - DMFI languages (needs custom handling)
-  # (TODO: Review for possible tree use cases.)
+
+  - typeName: csl_lang
+    columns:
+      Key: Key
+      Value:
+        path: dictionary.[Key]
+    yamlMap:
+      tree:
+        - dictionary
+        - Key
+        - column: Value
+          singleValue: true
 
   # Schema disabled for now.
   # - typeName: cursors
@@ -736,8 +845,30 @@ schemas:
 
   # Omitting schemas for:
   # - des_* (no idea what the hell that is, but I don't think it's vanilla!)
-  # - diffsettings (needs custom handling)
-  # (TODO: Review for possible tree use cases.)
+
+  - typeName: diffsettings
+    columns: 
+      Name: Name
+      DMEasy:
+        path: settings.[Name].dmEasy
+      Easy:
+        path: settings.[Name].easy
+      Normal:
+        path: settings.[Name].normal
+      Hardcore:
+        path: settings.[Name].hardcore
+      DMPlayers:
+        path: settings.[Name].dmPlayers
+    yamlMap:
+      tree:
+        - settings
+        - Name
+        - tuple:
+            dmEasy: DMEasy
+            easy: Easy
+            normal: Normal
+            hardcore: Hardcore
+            dmPlayers: DMPlayers
 
   - typeName: disease
     criticalColumn: Name
@@ -803,7 +934,6 @@ schemas:
 
   # Omitting schemas for:
   # - effectanim (no idea what it does)
-  # (TODO: Review for possible tree use cases.)
 
   - typeName: effecticons
     criticalColumns:
@@ -815,16 +945,27 @@ schemas:
       Icon: icon
       StrRef: strRef
 
+  - typeName: encdifficulty
+    columns: 
+      LABEL: Label
+      STRREF:
+        path: difficulty.[LABEL].strRef
+      VALUE:
+        path: difficulty.[LABEL].value
+    yamlMap:
+      tree: 
+        - difficulty
+        - LABEL
+        - tuple:
+            strRef: STRREF
+            value: VALUE
+
   # Omitting schemas for:
-  # - encdifficulty
   # - encumbrance (requires custom handler)
   # - environment (meh)
-  # - epicattacks (requires custom handler)
-  # - epicsaves (requires custom handler)
   # - eventtoolredirect (not sure what it's for)
   # - excitedduration (ditto)
   # - exptable (requires custom handler)
-  # (TODO: Review for possible tree use cases.)
   
   - typeName: feat
     criticalColumn: FEAT
