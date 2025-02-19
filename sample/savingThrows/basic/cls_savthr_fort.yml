@@ -1,0 +1,16 @@
+# Baseline from which all other high-Fortitude progressions are derived.
+yamlType: cls_savthr
+generateOutput: true
+
+# Default other saves to low progression.
+# Note that levelProgression and levelList schemas
+# use `inherits` logic, not `imports`!
+inherits:
+  - highFort
+  - cls_savthr_low
+
+# High-progression formulae are one point per 2 levels, plus 2 at level 1.
+fortitude: 0.5
+levels:
+  1:
+    fortitude: 2

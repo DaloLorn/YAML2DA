@@ -1,0 +1,15 @@
+# Solar Channeler CL progression.
+yamlType: cls_bsplvl
+generateOutput: true
+
+# What we're going to do here is default to full CL progression across the board...
+# and then subtract CLs as appropriate!
+inherits:
+  - cls_bsplvl_full
+levels:
+  1: 
+    bonusCasterLevels: -1
+  5: 
+    bonusCasterLevels: -1
+  10: 
+    bonusCasterLevels: -1

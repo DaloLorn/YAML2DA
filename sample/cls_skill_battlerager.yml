@@ -4,6 +4,8 @@ skills:
   # Fun fact: You don't actually need to have a crossClass section!
   # The game defaults to the assumption that any skill not listed in
   # a class skill table is a cross-class skill.
+  #
+  # ... POSSIBLY INVALID PER NWN WIKI; TESTING NEEDED TO CONFIRM THE ABOVE.
   crossClass:
     CraftWeapon: 26
   class:

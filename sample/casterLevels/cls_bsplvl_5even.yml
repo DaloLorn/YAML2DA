@@ -1,0 +1,19 @@
+# 5/10 CL progression advancing on even levels.
+yamlType: cls_bsplvl
+generateOutput: true
+
+# What we're going to do here is default to full CL progression across the board...
+# and then subtract CLs as appropriate!
+inherits:
+  - cls_bsplvl_full
+levels:
+  1: 
+    bonusCasterLevels: -1
+  3: 
+    bonusCasterLevels: -1
+  5: 
+    bonusCasterLevels: -1
+  7:
+    bonusCasterLevels: -1
+  9:
+    bonusCasterLevels: -1

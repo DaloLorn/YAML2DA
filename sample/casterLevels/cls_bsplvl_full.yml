@@ -1,0 +1,5 @@
+# By a quirk of how the others are defined, this is *the* base
+# caster level progression all others modify!
+yamlType: cls_bsplvl
+generateOutput: true
+bonusCasterLevels: 1

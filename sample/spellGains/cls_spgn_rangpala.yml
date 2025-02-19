@@ -1,0 +1,39 @@
+# Ranger/Paladin spell progression table.
+yamlType: cls_spgn
+generateOutput: true
+levels:
+  4: 
+    # Even though we're not getting any cantrip (level 0) slots,
+    # they still count towards the number of spell levels we gained on this level.
+    newSpellLevels: 2
+    gainSlots1: 0 # Don't gain any innate level 1 slots, but unlock the ability to have them.
+  6:
+    gainSlots1: 1
+  8: 
+    newSpellLevels: 1
+    gainSlots2: 0
+  10:
+    gainSlots2: 1
+  11:
+    newSpellLevels: 1
+    gainSlots3: 0
+  12:
+    gainSlots3: 1
+  14:
+    newSpellLevels: 1
+    gainSlots1: 1
+    gainSlots4: 0
+  15:
+    gainSlots4: 1
+  16:
+    gainSlots2: 1
+  17:
+    gainSlots3: 1
+  18:
+    gainSlots1: 1
+  19:
+    gainSlots2: 1
+    gainSlots3: 1
+    gainSlots4: 1
+  20:
+    gainSlots4: 1

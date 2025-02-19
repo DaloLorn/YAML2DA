@@ -1,0 +1,63 @@
+# Bard spell progression.
+yamlType: cls_spgn
+generateOutput: true
+levels: 
+  1:
+    newSpellLevels: 1
+    gainSlots0: 2
+  2:
+    newSpellLevels: 1
+    gainSlots0: 1
+    gainSlots1: 0 # Can't innately cast level 1 yet!
+  3: 
+    gainSlots1: 1
+  4: 
+    newSpellLevels: 1
+    gainSlots1: 1
+    gainSlots2: 0
+  5:
+    gainSlots1: 1
+    gainSlots2: 1
+  6:
+    gainSlots2: 1
+  7: 
+    newSpellLevels: 1
+    gainSlots3: 0
+  8: 
+    gainSlots2: 1
+    gainSlots3: 1
+  9:
+    gainSlots3: 1
+  10:
+    newSpellLevels: 1
+    gainSlots4: 0
+  11:
+    gainSlots3: 1
+    gainSlots4: 1
+  12:
+    gainSlots4: 1
+  13:
+    newSpellLevels: 1
+    gainSlots5: 0
+  14:
+    gainSlots0: 1
+    gainSlots4: 1
+    gainSlots5: 1
+  15:
+    gainSlots1: 1
+    gainSlots5: 1
+  16:
+    newSpellLevels: 1
+    gainSlots2: 1
+    gainSlots6: 0
+  17:
+    gainSlots3: 1
+    gainSlots6: 1
+  18:
+    gainSlots4: 1
+    gainSlots6: 1
+  19:
+    gainSlots5: 1
+    gainSlots6: 1
+  20:
+    gainSlots6: 1

@@ -1,0 +1,47 @@
+# Bard spell learning table.
+yamlType: cls_spkn
+generateOutput: true
+levels:
+  1:
+    learnSpells0: 4
+  2: 
+    learnSpells0: 1
+    learnSpells1: 2
+  3: 
+    learnSpells0: 1
+    learnSpells1: 1
+  4:
+    learnSpells2: 2
+  5: 
+    learnSpells1: 1
+    learnSpells2: 1
+  7: 
+    learnSpells2: 1
+    learnSpells3: 2
+  8:
+    learnSpells3: 1
+  10: 
+    learnSpells3: 1
+    learnSpells4: 2
+  11: 
+    learnSpells4: 1
+  13:
+    learnSpells4: 1
+    learnSpells5: 2
+  14: 
+    learnSpells5: 1
+  16:
+    learnSpells1: 1
+    learnSpells5: 1
+    learnSpells6: 2
+  17:
+    learnSpells2: 1
+    learnSpells6: 1
+  18:
+    learnSpells3: 1
+  19:
+    learnSpells4: 1
+    learnSpells6: 1
+  20:
+    learnSpells5: 1
+  

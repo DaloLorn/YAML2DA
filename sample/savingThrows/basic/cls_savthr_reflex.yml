@@ -1,0 +1,10 @@
+# Baseline from which all other high-Reflex progressions are derived.
+yamlType: cls_savthr
+generateOutput: true
+
+# Default other saves to low progression.
+# Note that levelProgression and levelList schemas
+# use `inherits` logic, not `imports`!
+inherits:
+  - highReflex
+  - cls_savthr_low

@@ -1,0 +1,23 @@
+# Cleric/druid spell progression.
+yamlType: cls_spgn
+generateOutput: true
+
+# Same as wizard, but with a few extra spell slots scattered throughout the progression.
+inherits:
+  - cls_spgn_wizard
+
+levels:
+  4: 
+    gainSlots0: 1
+  7: 
+    gainSlots0: 1
+  11:
+    gainSlots1: 1
+  13:
+    gainSlots2: 1
+  15:
+    gainSlots3: 1
+  17:
+    gainSlots4: 1
+  19:
+    gainSlots5: 1

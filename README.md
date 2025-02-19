@@ -31,7 +31,13 @@ Currently supports a variety 2DA types out of the box, in their vanilla configur
 - *catype*
 - *chargenClothes*
 - classes
+- cls_atk_*
+- cls_bfeat_*
+- cls_bsplvl_*
 - cls_feat_*
+- cls_savthr_*
+- cls_spgn_*
+- cls_spkn_*
 - *combatmodes*
 - *container_preference*
 - *creaturesize*
@@ -88,7 +94,9 @@ Additionally, users can define or modify 2DA types with a custom schema. This un
 2. Run `node yaml2da` to bring up an up-to-date help message.
 
 ## Format Documentation
-See the `sample` folder for sample files.
+See the `sample` folder for sample files. Subfolders listed in **`bold`** text contain complete subprojects based primarily on vanilla files with a few BGTSCC-specific additions (but not alterations). 
+
+(I say "subprojects" because while they're entirely independent of each other, they're likely to be used as chunks of a larger YAML2DA project.)
 
 <details>
 
@@ -104,6 +112,11 @@ See the `sample` folder for sample files.
 - `stonewort.yml` is an annotated sample of the custom schema defined in `schema/bgcraft_herbs.yml`.
 - `cls_skill_battlerager.yml` is a *lightly* annotated sample of the `cls_skill` type.
 - `color_calishite.yml` is likewise a lightly annotated sample of the `color` type.
+- **`savingThrows`** contains an array of standard saving throw progressions, plus the progression used by BGTSCC's Phantom base class as an example of the benefits of the new `cls_savthr` schema.
+- **`spellGains`** contains spell level/slot progressions for all vanilla spellcasting classes.
+- **`spellsKnown`** contains spell learning progressions for all vanilla spellcasting classes.
+- **`casterLevels`** contains caster level progressions for all BGTSCC PRCs, which should also suffice to cover all vanilla PRCs.
+- **`baseAttackBonus`** contains the vanilla BAB progressions.
 - While it's located outside the `sample` folder, the `defaultSchemas.yml` file also serves as an annotated sample of a multi-schema file.
 
 </details>

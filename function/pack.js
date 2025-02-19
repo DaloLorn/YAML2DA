@@ -25,7 +25,7 @@ export default async function packTo2DA(options) {
             console.error("The specified file is not a YAML2DA file!");
             return;
         }
-        projectIdentifier = targetFile.identifier || path.basename(project).toLowerCase().replace(".yml", "");
+        projectIdentifier = targetFile.identifier || path.basename(project).replace(/.yml$/i, "");
     }
     else {
         console.error("The specified path is neither a YAML file nor a folder!");
@@ -37,7 +37,7 @@ export default async function packTo2DA(options) {
         extension: '.yml',
         loader: async (filePath, filename) => {
             return {
-                filename: filename.toLowerCase(),
+                filename,
                 contents: parse(await readFile(filePath, 'utf-8'))
             };
         },
@@ -60,7 +60,7 @@ export default async function packTo2DA(options) {
             projectFiles.map(file => {
                 const result = {
                     ...file.contents,
-                    identifier: file.contents.identifier || file.filename.replace('.yml', ''),
+                    identifier: file.contents.identifier || file.filename.replace(/.yml$/i, ''),
                 }
                 return result;
             }),
@@ -70,7 +70,6 @@ export default async function packTo2DA(options) {
     );
 
     merge(schemaFiles, unloadedFiles.schema);
-    console.log(schemaFiles)
     forEach(schemaFiles, ModelTypes.load);
     const otherFiles = omit(unloadedFiles, 'schema');
     if(!otherFiles) {
@@ -94,7 +93,7 @@ export default async function packTo2DA(options) {
         // then either we'll throw an error or we'll write something!
         exported = true; 
 
-        const includeType = handler.hasMultipleFiles ? "imports" : "inherits";
+        const includeType = handler.dependencyField;
 
         context.files[typeName] = {};
         let files = type;
@@ -111,7 +110,7 @@ export default async function packTo2DA(options) {
 
         if(files.length) {
             const missingDependencies = files
-                .flatMap(list => list[includeType].filter(dependency => has(context.files[typeName], dependency)))
+                .flatMap(list => list[includeType].filter(dependency => !has(context.files[typeName], dependency)))
                 .reduce((results, dependency) => {
                     if(!results.includes(dependency))
                         results.push(dependency)
@@ -130,7 +129,7 @@ Unresolved dependencies: ${JSON.stringify(missingDependencies)}`);
 
             if(handler.hasMultipleFiles) {
                 forEach(type, async file => {
-                    if(file.generateOutput || file.identifier === projectIdentifier) {
+                    if(file.generateOutput && (!projectIdentifier || file.identifier === projectIdentifier)) {
                         const { packedFile, rowCount } = handler.pack(file);
                         const outputPath = path.join(outputFolder, `${file.identifier}.2da`);
                         await writeFile(outputPath, stringify(packedFile));

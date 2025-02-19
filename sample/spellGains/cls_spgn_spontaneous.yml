@@ -1,0 +1,71 @@
+# Baseline spell progression for spontaneous casters.
+# Obviously, bards get their own table...
+yamlType: cls_spgn
+generateOutput: true
+levels:
+  1: 
+    newSpellLevels: 2 # Unlock cantrips too!
+    gainSlots0: 5
+    gainSlots1: 3
+  2:
+    gainSlots0: 1
+    gainSlots1: 1
+  3: 
+    gainSlots1: 1
+  4: 
+    newSpellLevels: 1
+    gainSlots1: 1
+    gainSlots2: 3
+  5: 
+    gainSlots2: 1
+  6: 
+    newSpellLevels: 1
+    gainSlots2: 1
+    gainSlots3: 3
+  7:
+    gainSlots2: 1
+    gainSlots3: 1
+  8: 
+    newSpellLevels: 1
+    gainSlots3: 1
+    gainSlots4: 3
+  9: 
+    gainSlots3: 1
+    gainSlots4: 1
+  10:
+    newSpellLevels: 1
+    gainSlots4: 1
+    gainSlots5: 3
+  11:
+    gainSlots4: 1
+    gainSlots5: 1
+  12:
+    newSpellLevels: 1
+    gainSlots5: 1
+    gainSlots6: 3
+  13:
+    gainSlots5: 1
+    gainSlots6: 1
+  14:
+    newSpellLevels: 1
+    gainSlots6: 1
+    gainSlots7: 3
+  15:
+    gainSlots6: 1
+    gainSlots7: 1
+  16:
+    newSpellLevels: 1
+    gainSlots7: 1
+    gainSlots8: 3
+  17:
+    gainSlots7: 1
+    gainSlots8: 1
+  18:
+    newSpellLevels: 1
+    gainSlots8: 1
+    gainSlots9: 3
+  19:
+    gainSlots8: 1
+    gainSlots9: 1
+  20:
+    gainSlots9: 2

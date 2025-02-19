@@ -1,0 +1,56 @@
+# FS/Shaman spell learning progression.
+yamlType: cls_spkn
+generateOutput: true
+levels: 
+  1: 
+    learnSpells0: 5
+    learnSpells1: 3
+  2:
+    learnSpells0: 1
+  3:
+    learnSpells1: 1
+  4:
+    learnSpells2: 3
+  5: 
+    learnSpells1: 1
+  6:
+    learnSpells0: 1
+    learnSpells2: 1
+    learnSpells3: 3
+  7:
+    learnSpells1: 1
+  8:
+    learnSpells0: 1
+    learnSpells2: 1
+    learnSpells3: 1
+    learnSpells4: 3
+  10: 
+    learnSpells0: 1
+    learnSpells2: 1
+    learnSpells3: 1
+    learnSpells4: 1
+    learnSpells5: 3
+  12:
+    learnSpells3: 1
+    learnSpells4: 1
+    learnSpells5: 1
+    learnSpells6: 3
+  14:
+    learnSpells4: 1
+    learnSpells5: 1
+    learnSpells6: 1
+    learnSpells7: 3
+  16:
+    learnSpells5: 1
+    learnSpells6: 1
+    learnSpells7: 1
+    learnSpells8: 3
+  18:
+    learnSpells6: 1
+    learnSpells7: 1
+    learnSpells8: 1
+    learnSpells9: 3
+  20:
+    learnSpells7: 1
+    learnSpells8: 1
+    learnSpells9: 1

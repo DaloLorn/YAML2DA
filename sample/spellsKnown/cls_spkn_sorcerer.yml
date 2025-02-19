@@ -1,0 +1,63 @@
+# Sorcerer spell learning progression.
+yamlType: cls_spkn
+generateOutput: true
+levels: 
+  1: 
+    learnSpells0: 4
+    learnSpells1: 2
+  2:
+    learnSpells0: 1
+  3:
+    learnSpells1: 1
+  4:
+    learnSpells0: 1
+    learnSpells2: 1
+  5:
+    learnSpells1: 1
+    learnSpells2: 1
+  6:
+    learnSpells0: 1
+    learnSpells3: 1
+  7:
+    learnSpells1: 1
+    learnSpells2: 1
+    learnSpells3: 1
+  8:
+    learnSpells0: 1
+    learnSpells4: 1
+  9:
+    learnSpells2: 1
+    learnSpells3: 1
+    learnSpells4: 1
+  10:
+    learnSpells0: 1
+    learnSpells5: 1
+  11:
+    learnSpells2: 1
+    learnSpells3: 1
+    learnSpells4: 1
+    learnSpells5: 1
+  12:
+    learnSpells6: 1
+  13:
+    learnSpells4: 1
+    learnSpells5: 1
+    learnSpells6: 1
+  14:
+    learnSpells7: 1
+  15:
+    learnSpells5: 1
+    learnSpells6: 1
+    learnSpells7: 1
+  16:
+    learnSpells8: 1
+  17:
+    learnSpells7: 1
+    learnSpells8: 1
+  18:
+    learnSpells9: 1
+  19:
+    learnSpells8: 1
+    learnSpells9: 1
+  20:
+    learnSpells9: 1

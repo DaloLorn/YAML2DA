@@ -1,0 +1,8 @@
+# High Reflex/Will, low Fortitude.
+yamlType: cls_savthr
+generateOutput: true
+
+# This is basically just the Reflex table, but with high Will!
+inherits:
+  - highWill
+  - cls_savthr_reflex

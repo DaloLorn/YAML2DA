@@ -1,0 +1,8 @@
+# All high saves (like monks).
+yamlType: cls_savthr
+generateOutput: true
+
+inherits:
+  - highFort
+  - highReflex
+  - highWill

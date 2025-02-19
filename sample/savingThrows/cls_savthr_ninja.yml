@@ -1,0 +1,14 @@
+# Kaedrin Ninja saves.
+# (... *technically* BGTSCC Phantom saves, but I assume they're the same thing!)
+yamlType: cls_savthr
+generateOutput: true
+
+# Phantoms use the high-Reflex progression as a baseline.
+inherits:
+  - cls_savthr_reflex
+
+# But they also get an extra +2 Will at level 1, though this was not documented
+# on the BG wiki at the time this sample was written.
+levels:
+  1: 
+    will: 2

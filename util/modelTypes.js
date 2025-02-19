@@ -1,4 +1,4 @@
-import { keys, every, forEach, values, pickBy, negate, size, isNull, times, isEmpty, defaults, mergeWith, get, isObject, entries, set, setWith, has, last, isArray, split, isObjectLike, findIndex } from "lodash-es";
+import { keys, every, forEach, values, pickBy, negate, isNull, times, isEmpty, defaults, defaultsDeep, mergeWith, get, isObject, entries, set, setWith, has, last, isArray, split, isObjectLike, findIndex, floor, omit } from "lodash-es";
 import build2DA from "./build2da.js";
 import { parse, stringify } from "yaml"
 import { readFile } from 'fs/promises'
@@ -16,7 +16,7 @@ export default ModelTypes;
 
 function load(schema) {
     let loaded = false;
-    const { schemas, typeName, labelField, yamlMap } = schema;
+    const { schemas, typeName, labelField, yamlMap, schemaType } = schema;
     if(typeName) {
         if(reservedSchemas.includes(typeName))
             throw new SyntaxError(`Failed to load external schema: ${typeName} is a reserved keyword!`);
@@ -26,9 +26,10 @@ function load(schema) {
                 validate: buildValidator(schema),
                 pack: buildPacker(schema),
                 unpack: buildUnpacker(schema),
-                hasMultipleFiles: !!yamlMap,
+                hasMultipleFiles: !!yamlMap || ["levelAccumulator", "levelList"].includes(schemaType),
                 typeName,
                 labelField,
+                dependencyField: yamlMap ? "imports" : "inherits",
             }
             loaded = true;
         }
@@ -43,7 +44,7 @@ function load(schema) {
 
 function checkDuplicates(typeName, file, context) {
     if(keys(context.files[typeName]).includes(file.identifier))
-        throw new ReferenceError(`${typeName} identifier ${file.identifier} is declared twice! Remember that files without an explicit "identifier" field will use their lowercased filename as an identifier!`);
+        throw new ReferenceError(`${typeName} identifier ${file.identifier} is declared twice! Remember that files without an explicit "identifier" field will use their filename as an identifier!`);
 }
 
 function getDependencies(typeName, file, context, dependenciesKey) {
@@ -52,7 +53,7 @@ function getDependencies(typeName, file, context, dependenciesKey) {
         if(!keys(context.files[typeName]).includes(dependency)) {
             throw new ReferenceError(`Dependency ${dependency} for ${typeName} ${file.identifier} not found in project! Either it does not exist, or there is a circular dependency somewhere!`);
         }
-        return context.files[typeName][dependency];
+        return omit(context.files[typeName][dependency], reservedAliases);
     })
 }
 
@@ -62,12 +63,13 @@ function buildLoader(schema) {
         let result = file;
         checkDuplicates(typeName, file, context);
 
-        if(!yamlMap)
-            result = defaults(
+        if(!yamlMap) {
+            result = defaultsDeep(
                 result, 
-                ...getDependencies(typeName, file, context, "inherits")
+                ...getDependencies(typeName, file, context, "inherits"),
             );
-        else 
+        }
+        else {
             result = mergeWith(
                 result,
                 ...getDependencies(typeName, file, context, "imports"),
@@ -115,6 +117,7 @@ function buildLoader(schema) {
                     return undefined;
                 }
             );
+        }
         context.files[typeName][file.identifier] = result;
     }
 }
@@ -136,30 +139,76 @@ function getColumnAlias([key, column]) {
 }
 
 function buildPacker(schema) {
-    const { typeName, columns, yamlMap } = schema;
+    const { typeName, columns, yamlMap, schemaType, defaultRow } = schema;
 
-    if(!yamlMap) return files => {
+    if(["levelAccumulator", "levelList"].includes(schemaType)) {
+        const isAccumulator = schemaType === "levelAccumulator";
+        return file => {
+            const rows = [];
+            const mappers = entries(columns).map(([key, column]) => {
+                let netBonus = 0;
+                let formula, bonus, defaultNull;
+                if(typeof column === "string") {
+                    formula = column;
+                    bonus = column;
+                }
+                else {
+                    // Columns with the isLevelColumn flag
+                    // will always contain the level this row
+                    // is associated with.
+                    if(column?.isLevelColumn)
+                        return (i) => i+1;
+                    formula = column?.formula || column?.alias || key;
+                    bonus = column?.bonus || column?.alias || key;
+                    defaultNull = column?.defaultNull;
+                }
+                return (i) => {
+                    const levelBonus = (Number(file.levels?.[i+1]?.[bonus]) || 0);
+                    netBonus = isAccumulator ? netBonus + levelBonus : levelBonus;
+                    const result = 
+                        ((isAccumulator ? i+1 : 1) * (Number(file[formula]) || 0))
+                        + netBonus;
+                    const shouldBeNull = 
+                        defaultNull && !result
+                        && file.levels?.[i+1]?.[bonus] == null;
+                    //console.log(`${formula} + ${bonus}: ${isAccumulator ? i+1 : 1} = ${(i+1) * (Number(file[formula]) || 0)} + ${levelBonus} + ${isAccumulator ? netBonus - levelBonus : 0} = ${result} ${shouldBeNull ? "(should be null)" : ""}`);
+                    return shouldBeNull ? null : floor(result);
+                };
+            })
+            times(60, i => rows.push(mappers.map(mapper => mapper(i))));
+            return {
+                packedFile: build2DA(
+                    keys(columns),
+                    rows,
+                ),
+                rowCount: 60,               
+            }
+        }
+    }
+    else if(!yamlMap) return files => {
         const rows = [];
+        const columnLabels = keys(columns);
         const aliasedColumns = entries(columns).map(getColumnAlias);
         let rowCount = 0;
-        function packVariant(source, parent = times(size(columns), () => null)) {
+        function packRow(source, parent, isPadding = false) {
             if(!isObjectLike(source))
                 return;
             if(Number.isInteger(Number(source.id))) {
                 if(rows[source.id])
                     throw new ReferenceError(`Attempted to write to ${typeName} row ID ${source.id} twice! Each row ID must occur only once in the project!`);
 
-                rowCount++;
-                rows[source.id] = aliasedColumns.map((alias, index) => source[alias] ?? parent[index]);
+                !isPadding && rowCount++;
+                rows[source.id] = aliasedColumns.map((alias, index) => source[alias] ?? parent?.[index] ?? defaultRow?.[columnLabels[index]] ?? null);
             }
-            forEach(source.variants, variant => packVariant(variant, rows[source.id]));
+            forEach(source.variants, variant => packRow(variant, rows[source.id]));
+            return rows[source.id];
         }
 
-        forEach(files, file => packVariant(file));
+        forEach(files, file => packRow(file));
 
         let paddedRows = [];
         for(let i = 0; i < rows.length; i++) {
-            paddedRows[i] = rows[i] || times(size(columns), () => null);
+            paddedRows[i] = rows[i] || packRow({ id: i }, null, true);
         }
         return {
             packedFile: build2DA(
@@ -216,13 +265,13 @@ function buildPacker(schema) {
             // and map the layer's keys onto that column.
             if(!isObject(layer)) {
                 mappers[index] = (rowStub, value) => {
-                    rowStub[layer] = value;
+                    rowStub[layer] = value ?? defaultRow?.[layer] ?? null;
                 }
             } else {
                 const { mapping, column, tuple } = layer;
                 // Remaps a value to another value based on
                 // the mapping rules for that value (if any).
-                function applyMapping(rules, value) {                    
+                function applyMapping(rules, value, column) {                    
                     if(has(rules, value)) {
                         const rule = rules[value];
                         if(!isObject(rule)) {
@@ -235,7 +284,7 @@ function buildPacker(schema) {
                             else value = rule.default ?? null;
                         }
                     }
-                    return value;
+                    return value ?? defaultRow?.[column] ?? null;
                 }
 
                 // A leaf node might be a tuple instead of a scalar.
@@ -253,7 +302,7 @@ function buildPacker(schema) {
                             if(!isObject(definition)) {
                                 rowStub[definition] = value[part];
                             } else {
-                                rowStub[definition.column] = applyMapping(definition.mapping, value[part]);
+                                rowStub[definition.column] = applyMapping(definition.mapping, value[part], definition.column);
                             }
                         })
                     }
@@ -261,7 +310,7 @@ function buildPacker(schema) {
                 // Not a tuple, just needs some value mappings...
                 else {
                     mappers[index] = (rowStub, value) => {
-                        rowStub[column] = applyMapping(mapping, value);
+                        rowStub[column] = applyMapping(mapping, value, column);
                     }
                 }
             }
@@ -314,7 +363,7 @@ function buildPacker(schema) {
 }
 
 function buildUnpacker(schema) {
-    const { typeName, columns, criticalColumns, criticalColumn, yamlMap } = schema;
+    const { typeName, columns, criticalColumns, criticalColumn, yamlMap, schemaType } = schema;
 
     return (list, printNulls) => {
         // Get 2DA indices for the columns we need to read!
@@ -387,14 +436,22 @@ function buildUnpacker(schema) {
             }
         }).filter(row => !!row);
 
-        if(!yamlMap)
+        // Prepare output object for all schemas that can't return
+        // simpleTable directly.
+        const result = {
+            yamlType: typeName,
+            generateOutput: true,
+        };
+
+        if(schemaType === "levelAccumulator") {
+            return "stub";
+        }
+        else if(schemaType === "levelList") {
+            return "stub";
+        }
+        else if(!yamlMap)
             return simpleTable;
         else {
-            // Prepare the output object.
-            const result = {
-                yamlType: typeName,
-                generateOutput: true,
-            };
             // Precache setters for all fields that map to leaves in the
             // finished YAML.
             const mappers = [];

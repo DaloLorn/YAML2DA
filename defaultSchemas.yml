@@ -672,6 +672,7 @@ schemas:
         mapping:
         # Fun fact: Cross-class skills don't actually need
         # to be specified in a cls_skill table!
+        # TODO: Verify that I didn't tell everyone to brick their classes earlier...
           0: crossClass 
           1: class
     yamlMap:
@@ -735,14 +736,152 @@ schemas:
             eye: eyes
             facialHair: body_hair
 
+  - typeName: cls_atk
+    # The other schema types can be inferred from context
+    # (or are a default type anyway). This one is not,
+    # so we need to give it a schemaType.
+    #
+    # The levelAccumulator type is a 60-row table
+    # typically used to describe leveling progressions
+    # such as BAB, saving throws...
+    #
+    # Due to technical limitations, levelAccumulator data
+    # can only be exported to 2DA, and must be imported manually.
+    # Note that levelAccumulator is 1-indexed (as opposed to the 2DAs
+    # it corresponds to, which are 0-indexed), to more closely align
+    # with ingame behavior. Level 1 is level 1 is level 1.
+    schemaType: levelAccumulator
+    columns:
+      BAB: 
+        # The root-level "formula" field will contain the
+        # BAB progression rate from level to level.
+        # This is expressed as a multiplier to the row level,
+        # e.g. 0.75 will add 0.75 to the BAB value every level.
+        # (Values are rounded down to integers while exporting.)
+        formula: formula
+        # The "levels.[level].bonus" fields will contain
+        # one-off bonuses to BAB progression. This can be used
+        # to grant extra BAB on a level, or to slow down BAB
+        # progression on that level by providing a negative bonus.
+        bonus: bonus
+
+  - typeName: cls_bfeat
+    # The levelList type is a lot like levelAccumulator,
+    # but instead of totalling all the values from previous
+    # levels, it defaults each level to a value of 0 before
+    # applying formulae and bonuses. (With the caveat that formulae
+    # here just provide a base value independent of the row level.)
+    #
+    # Like levelAccumulator, levelList 2DAs cannot be imported
+    # at this time.
+    schemaType: levelList
+    columns:
+      # When `formula` and `bonus` are the same, they can just be defined
+      # using the `alias` field.
+      Bonus: bonusFeat
+      Normal: 
+        alias: normalFeat
+        # Some cls_bfeat tables only include bonus progression...
+        optional: true
+    
+  - typeName: cls_bsplvl
+    schemaType: levelList
+    columns:
+      GrantsBonusSpellcasterLevel: bonusCasterLevels
+  
+  - typeName: cls_savthr
+    schemaType: levelAccumulator
+    columns: 
+      Level:
+        # This column likely does nothing at all,
+        # but just in case: All values for it will
+        # be equal to the level for that row (i.e. rowID+1).
+        isLevelColumn: true
+      FortSave: fortitude
+      RefSave: reflex
+      WillSave: will
+
+  - typeName: cls_spgn
+    schemaType: levelAccumulator
+    columns:
+      Level:
+        isLevelColumn: true
+      NumSpellLevels:
+        alias: newSpellLevels
+      SpellLevel0:
+        # The cls_spgn tables use 0 as a special value denoting
+        # that you don't *innately* gain spell slots of a given level,
+        # but can get them from ability scores and such.
+        # For this reason, it needs to start at null instead of 0.
+        defaultNull: true
+        alias: gainSlots0
+      SpellLevel1:
+        defaultNull: true
+        alias: gainSlots1
+      SpellLevel2:
+        defaultNull: true
+        alias: gainSlots2
+      SpellLevel3:
+        defaultNull: true
+        alias: gainSlots3
+      SpellLevel4:
+        defaultNull: true
+        alias: gainSlots4
+      SpellLevel5:
+        defaultNull: true
+        alias: gainSlots5
+      SpellLevel6:
+        defaultNull: true
+        alias: gainSlots6
+      SpellLevel7:
+        defaultNull: true
+        alias: gainSlots7
+      SpellLevel8:
+        defaultNull: true
+        alias: gainSlots8
+      SpellLevel9:
+        defaultNull: true
+        alias: gainSlots9
+
+  - typeName: cls_spkn
+    schemaType: levelAccumulator
+    columns:
+      Level:
+        isLevelColumn: true
+      SpellLevel0:
+        # Unlike cls_spgn, this has no official explanation.
+        # But the vanilla 2DAs do it, so what the hell!
+        defaultNull: true
+        alias: learnSpells0
+      SpellLevel1:
+        defaultNull: true
+        alias: learnSpells1
+      SpellLevel2:
+        defaultNull: true
+        alias: learnSpells2
+      SpellLevel3:
+        defaultNull: true
+        alias: learnSpells3
+      SpellLevel4:
+        defaultNull: true
+        alias: learnSpells4
+      SpellLevel5:
+        defaultNull: true
+        alias: learnSpells5
+      SpellLevel6:
+        defaultNull: true
+        alias: learnSpells6
+      SpellLevel7:
+        defaultNull: true
+        alias: learnSpells7
+      SpellLevel8:
+        defaultNull: true
+        alias: learnSpells8
+      SpellLevel9:
+        defaultNull: true
+        alias: learnSpells9
 
   # Omitting schemas for:
-  # - cls_atk
-  # - cls_bfeat
-  # - cls_bsplvl
-  # - cls_savthr
-  # - cls_spgn
-  # - cls_spkn 
   # - cls_spon
   # These cannot be meaningfully described in the current YAML schema format.
 
@@ -1043,7 +1182,6 @@ schemas:
   # - Game_Params (wtf)
   # - gamespyrooms (meh)
   # - gender (meh)
-  # (TODO: Review for possible tree use cases.)
   
   - typeName: genericdoors
     labelField: label
@@ -1058,7 +1196,6 @@ schemas:
 
   # Omitting schemas for:
   # - grass (meh)
-  # (TODO: Review for possible tree use cases.)
   
   - typeName: hen_companion
     labelField: name
@@ -1106,7 +1243,6 @@ schemas:
   # - henchspells (wtf)
   # - inventorysnds (meh)
   # - iprp_* (mostly meh, and/or needs custom handling)
-  # (TODO: Review for possible tree use cases.)
   
   - typeName: itempropdef
     criticalColumn: Label
@@ -1144,7 +1280,6 @@ schemas:
   # - NWN2_BehaviorParams (meh)
   # - NWN2_BloodTypes (meh)
   # - NWN2_Colors (meh)
-  # (TODO: Review for possible tree use cases.)
   
   - typeName: nwn2_deities
     criticalColumn: FirstName
@@ -1203,7 +1338,6 @@ schemas:
   # - nwn2_tips (meh)
   # - NWN2_VoiceMenu (meh)
   # - nwnx_craft (uhhhh...?)
-  # (TODO: Review for possible tree use cases.)
   
   - typeName: packages
     criticalColumn: ClassID
@@ -1233,7 +1367,6 @@ schemas:
   # - packsp* (meh)
   # - parts_* (unreadable)
   # - phenotype (meh)
-  # (TODO: Review for possible tree use cases.)
   
   - typeName: placeableobjsnds
     criticalColumn: ArmorType
@@ -1279,7 +1412,6 @@ schemas:
 
   # Omitted schemas for:
   # - placeabletypes (meh)
-  # (TODO: Review for possible tree use cases.)
 
   - typeName: poison
     criticalColumn: Save_DC
@@ -1335,7 +1467,6 @@ schemas:
   # - pregen (meh)
   # - prioritygroups (meh)
   # - pvpsettings (meh)
-  # (TODO: Review for possible tree use cases.)
 
   - typeName: race_feat
     criticalColumn: FeatIndex
@@ -1435,7 +1566,6 @@ schemas:
   # - rrf_* (unreadable)
   # - screen_container_ui (meh)
   # - skill_mounted (eh?)
-  # (TODO: Review for possible tree use cases.)
   
   - typeName: skills
     labelField: label
@@ -1462,7 +1592,6 @@ schemas:
   # - skillvsitemcost (meh)
   # - skyboxes (meh)
   # - skyring (meh)
-  # (TODO: Review for possible tree use cases.)
 
   # Defined by xp_dae plugin
   - typeName: sneakfeats
@@ -1486,7 +1615,6 @@ schemas:
   # Omitted schemas for:
   # - sound* (meh, mostly unreadable)
   # - soundset (meh)
-  # (TODO: Review for possible tree use cases.)
   
   - typeName: spells
     # Noticed a HealingKit row which looks like padding,
@@ -1570,7 +1698,6 @@ schemas:
   # - stringtokens (meh)
   # - surfacemat (meh)
   # - swearfilter (meh)
-  # (TODO: Review for possible tree use cases.)
   
   - typeName: tailmodel
     labelField: label
@@ -1600,7 +1727,6 @@ schemas:
 
   # Omitted schemas for:
   # - vfx_fire_forget (meh)
-  # (TODO: Review for possible tree use cases.)
 
   - typeName: vfx_persistent
     criticalColumns:
@@ -1627,7 +1753,6 @@ schemas:
 
   # Omitted schemas for:
   # - videoquality (meh)
-  # (TODO: Review for possible tree use cases.)
 
   - typeName: visualeffects
     criticalColumn: Type_FD
@@ -1708,6 +1833,5 @@ schemas:
       MODEL: model
 
   # Omitted all remaining schemas V-X.
-  # (TODO: Review for possible tree use cases.)
 
 

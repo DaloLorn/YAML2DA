@@ -1,0 +1,73 @@
+# Baseline spell progression for prepared casters.
+# Cleric/druid progressions get some extra slots, but
+# follow the same overall progression.
+yamlType: cls_spgn
+generateOutput: true
+levels:
+  1: 
+    newSpellLevels: 2 # Unlock cantrips too!
+    gainSlots0: 3
+    gainSlots1: 1
+  2:
+    gainSlots0: 1
+    gainSlots1: 1
+  3:
+    newSpellLevels: 1
+    gainSlots2: 1
+  4:
+    gainSlots1: 1
+    gainSlots2: 1
+  5: 
+    newSpellLevels: 1
+    gainSlots3: 1
+  6: 
+    gainSlots2: 1
+    gainSlots3: 1
+  7: 
+    newSpellLevels: 1
+    gainSlots1: 1
+    gainSlots4: 1
+  8: 
+    gainSlots3: 1
+    gainSlots4: 1
+  9: 
+    newSpellLevels: 1
+    gainSlots2: 1
+    gainSlots5: 1
+  10: 
+    gainSlots4: 1
+    gainSlots5: 1
+  11:
+    newSpellLevels: 1
+    gainSlots3: 1
+    gainSlots6: 1
+  12:
+    gainSlots5: 1
+    gainSlots6: 1
+  13:
+    newSpellLevels: 1
+    gainSlots4: 1
+    gainSlots7: 1
+  14:
+    gainSlots6: 1
+    gainSlots7: 1
+  15:
+    newSpellLevels: 1
+    gainSlots5: 1
+    gainSlots8: 1
+  16:
+    gainSlots7: 1
+    gainSlots8: 1
+  17:
+    newSpellLevels: 1
+    gainSlots6: 1
+    gainSlots9: 1
+  18:
+    gainSlots8: 1
+    gainSlots9: 1
+  19: 
+    gainSlots7: 1
+    gainSlots9: 1
+  20:
+    gainSlots8: 1
+    gainSlots9: 1

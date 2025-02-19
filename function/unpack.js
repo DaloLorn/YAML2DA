@@ -63,8 +63,14 @@ export default async function unpackFrom2DA(options) {
 
             if(handler.hasMultipleFiles) {
                 const outputFile = joinPath(outputFolder, `${basename(file.toLowerCase(), ".2da")}.yml`)
-                await writeFile(outputFile, stringify(handler.unpack(parsed2DA, printNulls)));
-                console.log(`Unpacked ${basename(file)}`);
+                const unpacked = handler.unpack(parsed2DA, printNulls);
+                if(unpacked === "stub") {
+                    console.log(`Could not unpack ${basename(file)}: Schema type does not yet support importing.`);
+                }
+                else {
+                    await writeFile(outputFile, stringify(handler.unpack(parsed2DA, printNulls)));
+                    console.log(`Unpacked ${basename(file)}`);
+                }
             }
             else {
                 const outputSubfolder = joinPath(outputFolder, basename(file.toLowerCase(), ".2da"));

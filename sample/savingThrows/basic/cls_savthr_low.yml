@@ -1,0 +1,8 @@
+# Baseline from which all low-save progressions are derived.
+yamlType: cls_savthr
+generateOutput: true
+
+# Low-progression formulae are all one point per 3 levels.
+fortitude: 0.34
+reflex: 0.34
+will: 0.34

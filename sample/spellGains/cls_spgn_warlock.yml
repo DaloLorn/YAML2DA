@@ -1,0 +1,16 @@
+# Warlock invocation slot progression. No, really. :/
+yamlType: cls_spgn
+generateOutput: true
+levels:
+  1:
+    newSpellLevels: 2 # Cantrips again...
+    gainSlots1: 240 # The vanilla tables really give 240 spell slots for "infinite" invocations...
+  6: 
+    newSpellLevels: 1
+    gainSlots2: 240
+  11:
+    newSpellLevels: 1
+    gainSlots3: 240
+  16:
+    newSpellLevels: 1
+    gainSlots4: 240

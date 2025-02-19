@@ -1,0 +1,28 @@
+# Warlock invocation learning progression.
+yamlType: cls_spkn
+generateOutput: true
+levels: 
+  1:
+    learnSpells1: 1
+  2:
+    learnSpells1: 1
+  4: 
+    learnSpells1: 1
+  6:
+    learnSpells2: 1
+  8:
+    learnSpells2: 1
+  10:
+    learnSpells2: 1
+  11: 
+    learnSpells3: 1
+  13:
+    learnSpells3: 1
+  15:
+    learnSpells3: 1
+  16:
+    learnSpells4: 1
+  18:
+    learnSpells4: 1
+  20:
+    learnSpells4: 1

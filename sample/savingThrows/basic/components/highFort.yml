@@ -1,0 +1,8 @@
+# Baseline from which all high-Fortitude saving throw progressions are derived.
+yamlType: cls_savthr
+
+# High save progressions are 0.5 points per level, plus 2.
+fortitude: 0.5
+levels: 
+  1:
+    fortitude: 2

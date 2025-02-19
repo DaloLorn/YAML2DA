@@ -47,17 +47,15 @@ function exit(explanation) {
 if(filterType) 
     if(!filterType?.length)
         exit("Must specify at least one parameter for --filterType!");
-    else filterType = isString(filterType) ? [filterType] : filterType.filter(isString);
+    else options.filterType = isString(filterType) ? [filterType] : filterType.filter(isString);
 if(schema) 
     if(!schema?.length)
         exit("Must specify at least one parameter for --schema!");
-    else schema = isString(schema) ? schema : schema.filter(isString);
+    else options.schema = isString(schema) ? schema : schema.filter(isString);
 if(merge) 
     if(!merge?.length)
         exit("Must specify at least one parameter for --merge!");
-    else merge = isString(merge) ? merge : merge.filter(isString);
-
-//console.log(options)
+    else options.merge = isString(merge) ? merge : merge.filter(isString);
 
 if(!abort) {
     if(options.merge) {
